@@ -12,7 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedDelegateRouteImport } from './routes/_authenticated/delegate'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
+import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedTasksIdRouteImport } from './routes/_authenticated/tasks.$id'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,9 +33,29 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDelegateRoute = AuthenticatedDelegateRouteImport.update({
+  id: '/delegate',
+  path: '/delegate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   id: '/today',
   path: '/today',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTasksIdRoute = AuthenticatedTasksIdRouteImport.update({
+  id: '/tasks/$id',
+  path: '/tasks/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
@@ -43,35 +67,67 @@ const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/delegate': typeof AuthenticatedDelegateRoute
+  '/history': typeof AuthenticatedHistoryRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/delegate': typeof AuthenticatedDelegateRoute
+  '/history': typeof AuthenticatedHistoryRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/tasks': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/delegate': typeof AuthenticatedDelegateRoute
+  '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
+  '/_authenticated/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/today' | '/api/public/mcp'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/delegate'
+    | '/history'
+    | '/today'
+    | '/tasks/$id'
+    | '/api/public/mcp'
+    | '/tasks/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/today' | '/api/public/mcp'
+  to:
+    | '/'
+    | '/auth'
+    | '/delegate'
+    | '/history'
+    | '/today'
+    | '/tasks/$id'
+    | '/api/public/mcp'
+    | '/tasks'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/delegate'
+    | '/_authenticated/history'
     | '/_authenticated/today'
+    | '/_authenticated/tasks/$id'
     | '/api/public/mcp'
+    | '/_authenticated/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,11 +160,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/delegate': {
+      id: '/_authenticated/delegate'
+      path: '/delegate'
+      fullPath: '/delegate'
+      preLoaderRoute: typeof AuthenticatedDelegateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/today': {
       id: '/_authenticated/today'
       path: '/today'
       fullPath: '/today'
       preLoaderRoute: typeof AuthenticatedTodayRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks/': {
+      id: '/_authenticated/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks/'
+      preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks/$id': {
+      id: '/_authenticated/tasks/$id'
+      path: '/tasks/$id'
+      fullPath: '/tasks/$id'
+      preLoaderRoute: typeof AuthenticatedTasksIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/mcp': {
@@ -122,11 +206,19 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDelegateRoute: typeof AuthenticatedDelegateRoute
+  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
+  AuthenticatedTasksIdRoute: typeof AuthenticatedTasksIdRoute
+  AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDelegateRoute: AuthenticatedDelegateRoute,
+  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
+  AuthenticatedTasksIdRoute: AuthenticatedTasksIdRoute,
+  AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
