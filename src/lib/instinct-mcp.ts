@@ -648,7 +648,7 @@ export const TOOLS: ToolDef[] = [
         const buf = new Uint8Array(await blob.arrayBuffer());
         let bin = "";
         for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-        out.content_base64 = btoa(bin);
+        out["content_base64"] = btoa(bin);
       }
       return out;
     },
