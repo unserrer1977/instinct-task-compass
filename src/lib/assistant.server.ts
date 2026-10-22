@@ -179,6 +179,7 @@ export async function handleAssistant(request: Request) {
     // Commit headers only after inspecting upstream status.
     const stream = call.result.toUIMessageStreamResponse({
       originalMessages: messages,
+      generateMessageId: () => crypto.randomUUID(),
       sendReasoning: true,
       onError: (error) => {
         const e = error as { statusCode?: number; responseBody?: string; message?: string };
