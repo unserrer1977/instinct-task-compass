@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { recentUpdatesQuery } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
 import { EmptyState } from "@/components/task-bits";
-import { formatDateTime } from "@/lib/tasks";
+import { formatTaskTimestamp } from "@/lib/tasks";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
@@ -36,11 +36,13 @@ function History() {
                 <Icon name={u.source === "instinct" ? "neurology" : "person"} className="text-[17px]" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex justify-between gap-2">
-                  <p className="truncate text-[13px] font-semibold">{(u.tasks as { title: string } | null)?.title ?? "Task"}</p>
-                  <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{formatDateTime(u.created_at)}</span>
-                </div>
+                <p className="truncate text-[13px] font-semibold">{(u.tasks as { title: string } | null)?.title ?? "Task"}</p>
                 <p className="line-clamp-2 text-[13px] text-muted-foreground">{u.message}</p>
+                <p className="mt-1 flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+                  <Icon name="schedule" className="text-[13px]" />
+                  <time dateTime={u.created_at}>{formatTaskTimestamp(u.created_at)}</time>
+                  <span>· {u.source === "instinct" ? "Instinct" : "You"}</span>
+                </p>
               </div>
             </Link>
           ))}
