@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { assistantQuery } from "@/hooks/use-assistant";
+import { assistantQuery, type AssistantData } from "@/hooks/use-assistant";
 import { messageText, topicMessages } from "@/lib/assistant";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/app-shell";
@@ -17,7 +17,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
-export function TaskAssistant({ initial, viewedTopic = "all" }: { initial: Awaited<ReturnType<typeof assistantQuery.queryFn>>; viewedTopic?: string }) {
+export function TaskAssistant({ initial, viewedTopic = "all" }: { initial: AssistantData; viewedTopic?: string }) {
   const qc = useQueryClient();
   const { data = initial } = useQuery(assistantQuery);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -38,6 +38,7 @@ export function TaskAssistant({ initial, viewedTopic = "all" }: { initial: Await
   const assignments = { ...data.assignments };
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
+    if (!message) continue;
     const part = message.parts.find((p) => isToolUIPart(p) && p.type === "tool-organiseDiscussion" && p.state === "output-available");
     if (part && isToolUIPart(part) && part.state === "output-available") {
       const output = part.output as { topicId?: string };
@@ -102,7 +103,7 @@ function AssistantMessage({ message, streaming }: { message: UIMessage; streamin
     {message.parts.map((part, index) => {
       if (part.type === "text") return <MessageResponse key={index} isAnimating={streaming} className="break-words [&_a]:underline [&_a]:text-current">{part.text}</MessageResponse>;
       if (part.type === "reasoning" && part.text) return <Reasoning key={index} isStreaming={streaming && part.state === "streaming"} defaultOpen={false}><ReasoningTrigger /><ReasoningContent>{part.text}</ReasoningContent></Reasoning>;
-      if (isToolUIPart(part)) return <Tool key={index} defaultOpen={false}><ToolHeader type={part.type} state={part.state} title="Organise discussion" /><ToolContent><ToolInput input={part.input} /><ToolOutput output={part.output} errorText={part.errorText} /></ToolContent></Tool>;
+      if (isToolUIPart(part)) return <Tool key={index} defaultOpen={false}>{part.type === "dynamic-tool" ? <ToolHeader type={part.type} state={part.state} toolName={part.toolName} title="Organise discussion" /> : <ToolHeader type={part.type} state={part.state} title="Organise discussion" />}<ToolContent><ToolInput input={part.input} /><ToolOutput output={part.output} errorText={part.errorText} /></ToolContent></Tool>;
       return null;
     })}
   </MessageContent>{message.role === "assistant" && messageText(message) && !streaming && <MessageActions><MessageAction tooltip="Copy answer" onClick={() => { void navigator.clipboard.writeText(messageText(message)).then(() => toast.success("Answer copied")); }}><Copy /></MessageAction></MessageActions>}</Message>;
