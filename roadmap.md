@@ -1,3 +1,3 @@
-- [ ] Add atomic bulk status updates and conflict-safe Undo.
-- [ ] Add shared selection, Done controls, and bulk toolbar to Today and task lists (including Upcoming).
-- [ ] Verify status rules, authenticated task flow, and MCP readback.
+- [x] Add atomic bulk status updates and conflict-safe Undo.
+- [x] Add shared selection, Done controls, and bulk toolbar to Today and task lists (including Upcoming).
+- [x] Verify status rules, authenticated task flow, and MCP readback.
