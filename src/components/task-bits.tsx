@@ -59,7 +59,7 @@ export function TaskCard({ task }: { task: Task }) {
         </div>
         <StatusChip status={task.status} />
       </div>
-      <h3 className={cn("mt-2 text-[15px] font-semibold leading-snug tracking-tight", done && "text-muted-foreground")}>{task.title}</h3>
+      <h3 className={cn("mt-2 text-[15px] font-semibold leading-snug tracking-tight break-words [overflow-wrap:anywhere]", done && "text-muted-foreground")}>{task.title}</h3>
       {task.description && <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{task.description}</p>}
       {task.status === "in_progress" && (
         <div className="mt-3 flex flex-col gap-1.5">

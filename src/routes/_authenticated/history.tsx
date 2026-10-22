@@ -35,7 +35,7 @@ function History() {
                 <Icon name={u.source === "instinct" ? "neurology" : "person"} className="text-[17px]" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold">{(u.tasks as { title: string } | null)?.title ?? "Task"}</p>
+                <p className="break-words [overflow-wrap:anywhere] text-[13px] font-semibold">{(u.tasks as { title: string } | null)?.title ?? "Task"}</p>
                 <p className="line-clamp-2 text-[13px] text-muted-foreground">{u.message}</p>
                 <p className="mt-1 flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
                   <Icon name="schedule" className="text-[13px]" />

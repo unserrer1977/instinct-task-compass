@@ -131,6 +131,9 @@ function TaskInspector() {
         </section>
       )}
 
+      <TaskAttachments taskId={task.id} />
+
+
       <section className="card-surface p-4">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-[14px] font-semibold"><Icon name="history_edu" className="text-[18px] text-primary" /> Execution Audit Log</h2>
