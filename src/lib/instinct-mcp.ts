@@ -350,7 +350,13 @@ export const TOOLS: ToolDef[] = [
         .select("message,kind,status,progress,source,occurred_at,created_at")
         .eq("task_id", task.id)
         .order("effective_at", { ascending: true });
-      return { task, updates: updates ?? [] };
+      const { data: attachments } = await ctx.db
+        .from("task_attachments")
+        .select("id,file_name,mime_type,size_bytes,description,source,occurred_at,created_at")
+        .eq("task_id", task.id)
+        .eq("user_id", ctx.userId)
+        .order("created_at", { ascending: true });
+      return { task, updates: updates ?? [], attachments: attachments ?? [] };
     },
   },
   {
