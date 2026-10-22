@@ -80,3 +80,15 @@ export function formatTaskTimestamp(iso: string | null | undefined): string {
     hour: "2-digit", minute: "2-digit", timeZoneName: "short",
   }).format(date);
 }
+
+/** True when the record was uploaded noticeably after the task actually began (or its real start is unknown). */
+export function wasImportedLater(t: Pick<Task, "initiated_at" | "created_at" | "source">): boolean {
+  if (t.source !== "instinct") return false;
+  if (!t.initiated_at) return true;
+  return new Date(t.created_at).getTime() - new Date(t.initiated_at).getTime() > 5 * 60_000;
+}
+
+/** When a history entry actually happened; falls back to when it was recorded. */
+export function eventTime(u: Pick<TaskUpdate, "occurred_at" | "created_at">): string {
+  return u.occurred_at ?? u.created_at;
+}

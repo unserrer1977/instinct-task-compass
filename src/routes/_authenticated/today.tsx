@@ -120,7 +120,7 @@ function Today() {
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
                   <Icon name={categoryIcon(t.category)} className="text-[14px]" /> {t.category}
                 </span>
-                <span className="font-mono text-[11px] text-muted-foreground">{relativeTime(t.updated_at)}</span>
+                <span className="font-mono text-[11px] text-muted-foreground">{relativeTime(t.sort_activity_at)}</span>
               </div>
               <h3 className="mt-1.5 text-[15px] font-semibold tracking-tight">{t.title}</h3>
               {(t.current_step || t.description) && <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{t.current_step ?? t.description}</p>}

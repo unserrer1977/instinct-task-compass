@@ -107,12 +107,14 @@ function TaskInspector() {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <Meta icon="schedule" label="Created" value={formatTaskTimestamp(task.created_at)} />
-        <Meta icon="update" label="Last activity" value={formatTaskTimestamp(task.updated_at)} />
+        <Meta icon="schedule" label="Created" value={task.initiated_at ? formatTaskTimestamp(task.initiated_at) : "Original date unknown"} />
+        <Meta icon="play_circle" label="Work started" value={task.started_at ? formatTaskTimestamp(task.started_at) : "—"} />
+        <Meta icon="update" label="Last activity" value={task.last_activity_at ? formatTaskTimestamp(task.last_activity_at) : "Unknown"} />
         <Meta icon="event" label="Deadline" value={formatDateTime(task.deadline)} />
         <Meta icon="task_alt" label="Completed" value={formatTaskTimestamp(task.completed_at)} />
         <Meta icon="flag" label="Priority" value={task.priority} />
         <Meta icon="verified_user" label="Autonomy" value={task.autonomy.replace(/_/g, " ")} />
+        {wasImportedLater(task) && <Meta icon="cloud_upload" label="Imported" value={formatTaskTimestamp(task.created_at)} />}
       </div>
 
       {task.result && (
@@ -145,7 +147,7 @@ function TaskInspector() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-semibold text-muted-foreground">{u.source === "instinct" ? "Instinct" : "You"}{u.progress != null ? ` · ${u.progress}%` : ""}</span>
-                  <time dateTime={u.created_at} className="font-mono text-[11px] text-muted-foreground">{formatTaskTimestamp(u.created_at)}</time>
+                  <EventTime u={u} />
                 </div>
                 <p className="mt-0.5 whitespace-pre-wrap text-[13px]">{u.message}</p>
               </div>
