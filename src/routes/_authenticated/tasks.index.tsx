@@ -6,6 +6,7 @@ import { Icon } from "@/components/app-shell";
 import { EmptyState, ProgressBar, TaskCard } from "@/components/task-bits";
 import { CATEGORIES, categoryIcon } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { TaskSelectionBar } from "@/components/task-actions";
 
 const search = z.object({
   status: z.string().optional(),
@@ -130,7 +131,7 @@ function TasksPage() {
         {([
           ["active", "Active", groups.active.length],
           ["review", "Review", groups.review.length],
-          ["waiting", "Waiting", groups.waiting.length],
+          ["waiting", "Upcoming", groups.waiting.length],
           ["completed", "Done", groups.completed.length],
         ] as const).map(([k, label, n]) => (
           <button
@@ -143,6 +144,7 @@ function TasksPage() {
         ))}
       </div>
 
+      <TaskSelectionBar tasks={list} />
       <div className="flex flex-col gap-3">
         {isLoading ? (
           [0, 1].map((i) => <div key={i} className="h-32 animate-pulse rounded-xl bg-surface-mid" />)

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTaskSync, useCurrentUser } from "@/hooks/use-tasks";
 import { cn } from "@/lib/utils";
+import { TaskActionsProvider } from "@/components/task-actions";
 
 const LOGO =
   "https://lh3.googleusercontent.com/aida/AEtjO1XNdwqKDvIl9I17vJtOe1My9WIfrEQWi_flLbpXu6Ig46qYzSE9oi1hbqvJYXq2FzGMnmVN_YWBnn3ZJMaVG9aDXC8C6qQHlelY2Bv7SWZ5OfdpyJa_w-Zb7B6eoSyevuU_gVRAiFtzQjmYPGQ0NHuY8oD2zImABvACdqa-kp6-cYjxqhgRzPZ-kj32tLPQN51vWoZ8_So5x2JxlTkCeIfCdJFvbuYuLIX3LRpKx3QWGg_iif4_BUQheII";
@@ -47,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 w-full mx-auto max-w-3xl pt-16 pb-28 px-4">{children}</main>
+      <main className="flex-1 w-full mx-auto max-w-3xl pt-16 pb-28 px-4"><TaskActionsProvider>{children}</TaskActionsProvider></main>
 
       <nav className="fixed bottom-0 inset-x-0 z-50 glass-header border-t border-border">
         <div className="mx-auto max-w-3xl h-20 px-2 grid grid-cols-5 items-center">
