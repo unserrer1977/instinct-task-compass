@@ -38,6 +38,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
             </span>
           </Link>
+          <div className="flex items-center gap-3">
+          <Link to="/assistant" className="flex items-center gap-1.5 text-primary text-sm font-semibold" aria-label="Ask Instinct"><Icon name="forum" /><span className="hidden min-[380px]:inline">Ask Instinct</span></Link>
           <Link to="/settings" className="rounded-full p-0.5 hover:bg-surface-high transition-colors" aria-label="Settings">
             {avatar ? (
               <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full object-cover" />
@@ -45,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary">{initial}</span>
             )}
           </Link>
+          </div>
         </div>
       </header>
 

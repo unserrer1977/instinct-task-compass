@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedDelegateRouteImport } from './routes/_authenticated/delegate'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
+import { Route as AuthenticatedDiscussionsTopicIdRouteImport } from './routes/_authenticated/discussions.$topicId'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
 import { Route as AuthenticatedTasksIdRouteImport } from './routes/_authenticated/tasks.$id'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
@@ -33,6 +36,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAssistantRoute = AuthenticatedAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDelegateRoute = AuthenticatedDelegateRouteImport.update({
   id: '/delegate',
@@ -54,6 +62,17 @@ const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   path: '/today',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDiscussionsTopicIdRoute =
+  AuthenticatedDiscussionsTopicIdRouteImport.update({
+    id: '/discussions/$topicId',
+    path: '/discussions/$topicId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
@@ -73,10 +92,13 @@ const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
+  '/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -84,10 +106,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
+  '/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
@@ -97,10 +122,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/delegate': typeof AuthenticatedDelegateRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
+  '/_authenticated/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/_authenticated/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -110,10 +138,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/assistant'
     | '/delegate'
     | '/history'
     | '/settings'
     | '/today'
+    | '/api/assistant'
+    | '/discussions/$topicId'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks/'
@@ -121,10 +152,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/assistant'
     | '/delegate'
     | '/history'
     | '/settings'
     | '/today'
+    | '/api/assistant'
+    | '/discussions/$topicId'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks'
@@ -133,10 +167,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/assistant'
     | '/_authenticated/delegate'
     | '/_authenticated/history'
     | '/_authenticated/settings'
     | '/_authenticated/today'
+    | '/api/assistant'
+    | '/_authenticated/discussions/$topicId'
     | '/_authenticated/tasks/$id'
     | '/api/public/mcp'
     | '/_authenticated/tasks/'
@@ -146,6 +183,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAssistantRoute: typeof ApiAssistantRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
 }
 
@@ -171,6 +209,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/assistant': {
+      id: '/_authenticated/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AuthenticatedAssistantRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/delegate': {
       id: '/_authenticated/delegate'
@@ -200,6 +245,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodayRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/discussions/$topicId': {
+      id: '/_authenticated/discussions/$topicId'
+      path: '/discussions/$topicId'
+      fullPath: '/discussions/$topicId'
+      preLoaderRoute: typeof AuthenticatedDiscussionsTopicIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
@@ -225,19 +284,23 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
   AuthenticatedDelegateRoute: typeof AuthenticatedDelegateRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
+  AuthenticatedDiscussionsTopicIdRoute: typeof AuthenticatedDiscussionsTopicIdRoute
   AuthenticatedTasksIdRoute: typeof AuthenticatedTasksIdRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
   AuthenticatedDelegateRoute: AuthenticatedDelegateRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
+  AuthenticatedDiscussionsTopicIdRoute: AuthenticatedDiscussionsTopicIdRoute,
   AuthenticatedTasksIdRoute: AuthenticatedTasksIdRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
 }
@@ -249,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAssistantRoute: ApiAssistantRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
 }
 export const routeTree = rootRouteImport
