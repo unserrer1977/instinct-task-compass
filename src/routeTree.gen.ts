@@ -18,10 +18,10 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
+import { Route as AuthenticatedDiscussionsTopicIdRouteImport } from './routes/_authenticated/discussions.$topicId'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
 import { Route as AuthenticatedTasksIdRouteImport } from './routes/_authenticated/tasks.$id'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
-import { Route as AuthenticatedAssistantTopicsTopicIdRouteImport } from './routes/_authenticated/assistant.topics.$topicId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -67,6 +67,12 @@ const ApiAssistantRoute = ApiAssistantRouteImport.update({
   path: '/api/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDiscussionsTopicIdRoute =
+  AuthenticatedDiscussionsTopicIdRouteImport.update({
+    id: '/discussions/$topicId',
+    path: '/discussions/$topicId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
@@ -82,56 +88,50 @@ const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
   path: '/api/public/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAssistantTopicsTopicIdRoute =
-  AuthenticatedAssistantTopicsTopicIdRouteImport.update({
-    id: '/topics/$topicId',
-    path: '/topics/$topicId',
-    getParentRoute: () => AuthenticatedAssistantRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/assistant': typeof AuthenticatedAssistantRouteWithChildren
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
+  '/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
-  '/assistant/topics/$topicId': typeof AuthenticatedAssistantTopicsTopicIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/assistant': typeof AuthenticatedAssistantRouteWithChildren
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
+  '/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/assistant/topics/$topicId': typeof AuthenticatedAssistantTopicsTopicIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/assistant': typeof AuthenticatedAssistantRouteWithChildren
+  '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/delegate': typeof AuthenticatedDelegateRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
+  '/_authenticated/discussions/$topicId': typeof AuthenticatedDiscussionsTopicIdRoute
   '/_authenticated/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
-  '/_authenticated/assistant/topics/$topicId': typeof AuthenticatedAssistantTopicsTopicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,10 +144,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/today'
     | '/api/assistant'
+    | '/discussions/$topicId'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks/'
-    | '/assistant/topics/$topicId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,10 +158,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/today'
     | '/api/assistant'
+    | '/discussions/$topicId'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks'
-    | '/assistant/topics/$topicId'
   id:
     | '__root__'
     | '/'
@@ -173,10 +173,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/today'
     | '/api/assistant'
+    | '/_authenticated/discussions/$topicId'
     | '/_authenticated/tasks/$id'
     | '/api/public/mcp'
     | '/_authenticated/tasks/'
-    | '/_authenticated/assistant/topics/$topicId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/discussions/$topicId': {
+      id: '/_authenticated/discussions/$topicId'
+      path: '/discussions/$topicId'
+      fullPath: '/discussions/$topicId'
+      preLoaderRoute: typeof AuthenticatedDiscussionsTopicIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
@@ -273,47 +280,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/assistant/topics/$topicId': {
-      id: '/_authenticated/assistant/topics/$topicId'
-      path: '/topics/$topicId'
-      fullPath: '/assistant/topics/$topicId'
-      preLoaderRoute: typeof AuthenticatedAssistantTopicsTopicIdRouteImport
-      parentRoute: typeof AuthenticatedAssistantRoute
-    }
   }
 }
-
-interface AuthenticatedAssistantRouteChildren {
-  AuthenticatedAssistantTopicsTopicIdRoute: typeof AuthenticatedAssistantTopicsTopicIdRoute
-}
-
-const AuthenticatedAssistantRouteChildren: AuthenticatedAssistantRouteChildren =
-  {
-    AuthenticatedAssistantTopicsTopicIdRoute:
-      AuthenticatedAssistantTopicsTopicIdRoute,
-  }
-
-const AuthenticatedAssistantRouteWithChildren =
-  AuthenticatedAssistantRoute._addFileChildren(
-    AuthenticatedAssistantRouteChildren,
-  )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRouteWithChildren
+  AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
   AuthenticatedDelegateRoute: typeof AuthenticatedDelegateRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
+  AuthenticatedDiscussionsTopicIdRoute: typeof AuthenticatedDiscussionsTopicIdRoute
   AuthenticatedTasksIdRoute: typeof AuthenticatedTasksIdRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAssistantRoute: AuthenticatedAssistantRouteWithChildren,
+  AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
   AuthenticatedDelegateRoute: AuthenticatedDelegateRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
+  AuthenticatedDiscussionsTopicIdRoute: AuthenticatedDiscussionsTopicIdRoute,
   AuthenticatedTasksIdRoute: AuthenticatedTasksIdRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
 }

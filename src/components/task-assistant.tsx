@@ -64,7 +64,7 @@ export function TaskAssistant({ initial, viewedTopic = "all" }: { initial: Assis
     </div>
     <div className="flex items-center gap-2 overflow-x-auto shrink-0 pb-1" aria-label="Discussion topics">
       <Button asChild variant={viewedTopic === "all" ? "secondary" : "ghost"} size="sm"><Link to="/assistant">All discussions</Link></Button>
-      {data.topics.map((item) => <Button asChild key={item.id} variant={viewedTopic === item.id ? "secondary" : "ghost"} size="sm" className="shrink-0 max-w-48"><Link to="/assistant/topics/$topicId" params={{ topicId: item.id }}><span className="truncate">{item.title}</span></Link></Button>)}
+      {data.topics.map((item) => <Button asChild key={item.id} variant={viewedTopic === item.id ? "secondary" : "ghost"} size="sm" className="shrink-0 max-w-48"><Link to="/discussions/$topicId" params={{ topicId: item.id }}><span className="truncate">{item.title}</span></Link></Button>)}
     </div>
     {topic && <div className="flex items-center justify-between border-b border-border pb-3 gap-2"><h2 className="text-sm font-semibold truncate">{topic.title}</h2>{topic.task_id && <Button asChild size="sm" variant="ghost"><Link to="/tasks/$id" params={{ id: topic.task_id }}>View task <Icon name="arrow_forward" /></Link></Button>}</div>}
     <Conversation className="min-h-0" key={viewedTopic}>
@@ -78,7 +78,7 @@ export function TaskAssistant({ initial, viewedTopic = "all" }: { initial: Assis
           const assigned = data.topics.find((t) => t.id === assignments[message.id]);
           const previous = visible[index - 1];
           return <div key={message.id} className="min-w-0">
-            {assigned && viewedTopic === "all" && assignments[previous?.id ?? ""] !== assigned.id && <div className="flex items-center gap-2 mb-4"><div className="h-px flex-1 bg-border" /><Link to="/assistant/topics/$topicId" params={{ topicId: assigned.id }} className="text-xs text-muted-foreground truncate max-w-[65%]">{assigned.title}</Link><div className="h-px flex-1 bg-border" /></div>}
+            {assigned && viewedTopic === "all" && assignments[previous?.id ?? ""] !== assigned.id && <div className="flex items-center gap-2 mb-4"><div className="h-px flex-1 bg-border" /><Link to="/discussions/$topicId" params={{ topicId: assigned.id }} className="text-xs text-muted-foreground truncate max-w-[65%]">{assigned.title}</Link><div className="h-px flex-1 bg-border" /></div>}
             <AssistantMessage message={message} streaming={busy && message.id === messages.at(-1)?.id} />
           </div>;
         })}

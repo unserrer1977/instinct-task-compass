@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { assistantQuery } from "@/hooks/use-assistant";
 import { TaskAssistant } from "@/components/task-assistant";
 
-export const Route = createFileRoute("/_authenticated/assistant/topics/$topicId")({
+export const Route = createFileRoute("/_authenticated/discussions/$topicId")({
   loader: ({ context }) => context.queryClient.ensureQueryData(assistantQuery),
   head: () => ({ meta: [
     { title: "Topic Discussion — Instinct Task Assistant" }, { name: "description", content: "Review a topic’s saved task questions, answers and suggested next steps." },
