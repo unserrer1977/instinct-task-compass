@@ -1,6 +1,6 @@
 - [x] Add atomic bulk status updates and conflict-safe Undo.
 - [x] Add shared selection, Done controls, and bulk toolbar to Today and task lists (including Upcoming).
 - [x] Verify status rules, authenticated task flow, and MCP readback.
-- [ ] Add secure AI-powered task answers with automatic topic organisation and account history.
-- [ ] Add unified assistant interface and topic viewing.
-- [ ] Verify grounded answers, history restoration, and access protection.
+- [x] Add secure AI-powered task answers with automatic topic organisation and account history.
+- [x] Add unified assistant interface and topic viewing.
+- [x] Verify grounded answers, history restoration, and access protection.
