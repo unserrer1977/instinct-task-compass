@@ -22,8 +22,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   useTaskSync();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { data: user } = useCurrentUser();
-  const initial = (user?.user_metadata?.full_name ?? user?.email ?? "?").charAt(0).toUpperCase();
-  const avatar = user?.user_metadata?.avatar_url as string | undefined;
+  const initial = (user?.user_metadata?.["full_name"] ?? user?.email ?? "?").charAt(0).toUpperCase();
+  const avatar = user?.user_metadata?.["avatar_url"] as string | undefined;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

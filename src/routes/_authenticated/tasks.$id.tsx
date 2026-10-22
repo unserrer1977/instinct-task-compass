@@ -65,7 +65,7 @@ function TaskInspector() {
   async function remove() {
     if (!confirm("Delete this task and its history permanently?")) return;
     const { error } = await supabase.from("tasks").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["tasks"] });
     navigate({ to: "/tasks" });
   }

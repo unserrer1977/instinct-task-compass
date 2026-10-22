@@ -37,11 +37,11 @@ function Delegate() {
   const [busy, setBusy] = useState(false);
 
   async function submit(asDraft: boolean) {
-    const t = title.trim() || prompt.trim().split("\n")[0].slice(0, 120);
-    if (!t) return toast.error("Describe the objective first");
+    const t = title.trim() || (prompt.trim().split("\n")[0] ?? "").slice(0, 120);
+    if (!t) { toast.error("Describe the objective first"); return; }
     setBusy(true);
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
+    if (!u.user) { setBusy(false); return; }
     const { data, error } = await supabase
       .from("tasks")
       .insert({
@@ -61,7 +61,7 @@ function Delegate() {
       await supabase.from("task_updates").insert({ task_id: data.id, user_id: u.user.id, message: asDraft ? "Saved as draft" : "Delegated from dashboard — waiting for Instinct to pick it up", kind: "created", source: "dashboard" });
     }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["tasks"] });
     toast.success(asDraft ? "Draft saved" : "Task delegated to Instinct");
     navigate({ to: "/tasks/$id", params: { id: data.id } });

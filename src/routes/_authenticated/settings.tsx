@@ -109,7 +109,7 @@ function Settings() {
 
   async function rpc(method: string, token?: string, params: object = {}) {
     const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "application/json, text/event-stream" };
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     const r = await fetch(mcpUrl, { method: "POST", headers, body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method, params }) });
     const body = await r.json().catch(() => null);
     return { status: r.status, body };

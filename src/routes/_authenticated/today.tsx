@@ -36,7 +36,7 @@ function Today() {
     return () => clearInterval(i);
   }, []);
 
-  const name = (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
+  const name = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   const inProgress = tasks.filter((t) => t.status === "in_progress");

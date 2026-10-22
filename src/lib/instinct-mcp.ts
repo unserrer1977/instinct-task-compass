@@ -302,7 +302,7 @@ function jsonSchema(obj: z.ZodObject<z.ZodRawShape>) {
       t = (t as any)._def.innerType;
     }
     const desc = (raw as z.ZodTypeAny).description ?? t.description;
-    let s: Record<string, unknown> = {};
+    let s: any = {};
     if (t instanceof z.ZodString) {
       s = { type: "string" };
       for (const c of (t as any)._def.checks ?? []) {
