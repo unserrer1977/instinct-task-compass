@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { taskUpdatesQuery, useTasks } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
-import { ProgressBar, SourceBadge, StatusChip } from "@/components/task-bits";
-import { categoryIcon, formatDateTime, formatTaskTimestamp, isOpen, statusMeta, TASK_STATUSES, type Task } from "@/lib/tasks";
+import { EventTime, ProgressBar, SourceBadge, StatusChip } from "@/components/task-bits";
+import { categoryIcon, formatDateTime, formatTaskTimestamp, isOpen, statusMeta, TASK_STATUSES, wasImportedLater, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
