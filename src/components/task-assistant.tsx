@@ -136,7 +136,7 @@ export function TaskAssistant({
             className="shrink-0 max-w-48"
           >
             <Link to="/discussions/$topicId" params={{ topicId: item.id }}>
-              <span className="truncate">{item.title}</span>
+              <span className="break-words text-left">{item.title}</span>
             </Link>
           </Button>
         ))}

@@ -8,6 +8,7 @@ import { Icon } from "@/components/app-shell";
 import { EventTime, ProgressBar, SourceBadge, StatusChip } from "@/components/task-bits";
 import { categoryIcon, formatDateTime, formatTaskTimestamp, isOpen, statusMeta, TASK_STATUSES, wasImportedLater, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { TaskAttachments } from "@/components/task-attachments";
 
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
   head: () => ({
@@ -130,6 +131,9 @@ function TaskInspector() {
           <p className="mt-2 whitespace-pre-wrap text-[14px] text-muted-foreground">{task.notes}</p>
         </section>
       )}
+
+      <TaskAttachments taskId={task.id} />
+
 
       <section className="card-surface p-4">
         <div className="flex items-center justify-between">

@@ -350,7 +350,13 @@ export const TOOLS: ToolDef[] = [
         .select("message,kind,status,progress,source,occurred_at,created_at")
         .eq("task_id", task.id)
         .order("effective_at", { ascending: true });
-      return { task, updates: updates ?? [] };
+      const { data: attachments } = await ctx.db
+        .from("task_attachments")
+        .select("id,file_name,mime_type,size_bytes,description,source,occurred_at,created_at")
+        .eq("task_id", task.id)
+        .eq("user_id", ctx.userId)
+        .order("created_at", { ascending: true });
+      return { task, updates: updates ?? [], attachments: attachments ?? [] };
     },
   },
   {
@@ -529,7 +535,161 @@ export const TOOLS: ToolDef[] = [
       return { deleted: true, id: task.id };
     },
   },
+  {
+    name: "upload_attachment",
+    title: "Upload task attachment",
+    description:
+      "Attach a file (document, image, etc.) to an existing task, including historical tasks — find the task by id or external_ref; this never creates a task. Send content_base64 or a public source_url. Max 20 MB. Identical files already on the task are not duplicated (returns duplicate=true).",
+    input: z
+      .object({
+        ...ref,
+        file_name: z.string().min(1).max(255).describe("Original file name including extension."),
+        mime_type: z.string().max(150).optional().describe("MIME type, e.g. application/pdf. Guessed from the name if omitted."),
+        content_base64: z.string().optional().describe("File content, base64 encoded."),
+        source_url: z.string().url().optional().describe("Public https URL to fetch the file from instead of content_base64."),
+        description: z.string().max(1000).optional(),
+        occurred_at: TS.nullable().optional().describe(`When the file was originally produced/attached. ${TS_HELP}`),
+      })
+      .strict(),
+    annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
+    run: async (ctx, a) => {
+      const task = await findTask(ctx, a.id, a.external_ref);
+      if (!!a.content_base64 === !!a.source_url) throw new ToolErr("Provide exactly one of content_base64 or source_url.");
+      let bytes: Uint8Array<ArrayBuffer>;
+      let mime = a.mime_type as string | undefined;
+      if (a.content_base64) {
+        try {
+          const bin = atob(String(a.content_base64).replace(/^data:[^,]*,/, "").replace(/\s/g, ""));
+          bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+        } catch {
+          throw new ToolErr("content_base64 is not valid base64.");
+        }
+      } else {
+        if (!/^https:\/\//i.test(a.source_url)) throw new ToolErr("source_url must be https.");
+        const res = await fetch(a.source_url).catch(() => null);
+        if (!res || !res.ok) throw new ToolErr(`Could not download source_url (${res?.status ?? "network error"}).`);
+        bytes = new Uint8Array(await res.arrayBuffer());
+        mime ??= res.headers.get("content-type")?.split(";")[0] ?? undefined;
+      }
+      if (bytes.byteLength === 0) throw new ToolErr("File is empty.");
+      if (bytes.byteLength > MAX_ATTACHMENT) throw new ToolErr("File exceeds the 20 MB limit.");
+      mime = mime || guessMime(a.file_name);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      const sha256 = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+      const { data: existing } = await ctx.db
+        .from("task_attachments")
+        .select(ATT_FIELDS)
+        .eq("task_id", task.id)
+        .eq("user_id", ctx.userId)
+        .eq("sha256", sha256)
+        .maybeSingle();
+      if (existing) return { duplicate: true, attachment: existing };
+      const safe = a.file_name.replace(/[^A-Za-z0-9._-]+/g, "_").slice(-120) || "file";
+      const path = `${ctx.userId}/${task.id}/${crypto.randomUUID()}-${safe}`;
+      const up = await ctx.db.storage.from(BUCKET).upload(path, bytes, { contentType: mime, upsert: false });
+      if (up.error) throw new ToolErr(`Upload failed: ${up.error.message}`);
+      const { data, error } = await ctx.db
+        .from("task_attachments")
+        .insert({
+          task_id: task.id,
+          user_id: ctx.userId,
+          file_name: a.file_name,
+          mime_type: mime,
+          size_bytes: bytes.byteLength,
+          storage_path: path,
+          sha256,
+          description: a.description ?? null,
+          source: "instinct",
+          occurred_at: normTs(a.occurred_at, "occurred_at") ?? null,
+        })
+        .select(ATT_FIELDS)
+        .single();
+      if (error) {
+        await ctx.db.storage.from(BUCKET).remove([path]);
+        throw new ToolErr(error.message);
+      }
+      return { duplicate: false, attachment: data };
+    },
+  },
+  {
+    name: "list_attachments",
+    title: "List task attachments",
+    description: "List attachments on one task (id or external_ref), or across all tasks when neither is given.",
+    input: z
+      .object({
+        id: z.string().uuid().optional(),
+        external_ref: z.string().max(200).optional(),
+        limit: z.number().int().min(1).max(200).optional(),
+      })
+      .strict(),
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    run: async (ctx, a) => {
+      let q = ctx.db.from("task_attachments").select(ATT_FIELDS).eq("user_id", ctx.userId);
+      if (a.id || a.external_ref) q = q.eq("task_id", (await findTask(ctx, a.id, a.external_ref)).id);
+      const { data, error } = await q.order("created_at", { ascending: false }).limit(a.limit ?? 50);
+      if (error) throw new ToolErr(error.message);
+      return { attachments: data ?? [], count: data?.length ?? 0 };
+    },
+  },
+  {
+    name: "get_attachment",
+    title: "Get task attachment",
+    description: "Get an attachment's details and a temporary (1 hour) download link. Set include_content to also receive base64 content for files up to 2 MB.",
+    input: z.object({ attachment_id: z.string().uuid(), include_content: z.boolean().optional() }).strict(),
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    run: async (ctx, a) => {
+      const att = await findAttachment(ctx, a.attachment_id);
+      const { data: signed } = await ctx.db.storage.from(BUCKET).createSignedUrl(att.storage_path, 3600, { download: att.file_name });
+      const out: Record<string, unknown> = { attachment: att, download_url: signed?.signedUrl ?? null, expires_in: 3600 };
+      if (a.include_content) {
+        if (att.size_bytes > 2 * 1024 * 1024) throw new ToolErr("File is larger than 2 MB; use download_url instead.");
+        const { data: blob, error } = await ctx.db.storage.from(BUCKET).download(att.storage_path);
+        if (error || !blob) throw new ToolErr("Could not read file.");
+        const buf = new Uint8Array(await blob.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        out["content_base64"] = btoa(bin);
+      }
+      return out;
+    },
+  },
+  {
+    name: "delete_attachment",
+    title: "Delete task attachment",
+    description: "Permanently remove an attachment from its task. Only when the user asks.",
+    input: z.object({ attachment_id: z.string().uuid() }).strict(),
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+    run: async (ctx, a) => {
+      const att = await findAttachment(ctx, a.attachment_id);
+      await ctx.db.storage.from(BUCKET).remove([att.storage_path]);
+      const { error } = await ctx.db.from("task_attachments").delete().eq("id", att.id).eq("user_id", ctx.userId);
+      if (error) throw new ToolErr(error.message);
+      return { deleted: true, id: att.id };
+    },
+  },
 ];
+
+// ---------- Attachments ----------
+const BUCKET = "task-attachments";
+const MAX_ATTACHMENT = 20 * 1024 * 1024;
+const ATT_FIELDS = "id,task_id,file_name,mime_type,size_bytes,storage_path,sha256,description,source,occurred_at,created_at";
+const MIME: Record<string, string> = {
+  pdf: "application/pdf", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml",
+  txt: "text/plain", md: "text/markdown", csv: "text/csv", json: "application/json", html: "text/html",
+  doc: "application/msword", docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ppt: "application/vnd.ms-powerpoint", pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  zip: "application/zip", mp3: "audio/mpeg", mp4: "video/mp4", mov: "video/quicktime",
+};
+export function guessMime(name: string) {
+  return MIME[name.split(".").pop()?.toLowerCase() ?? ""] ?? "application/octet-stream";
+}
+async function findAttachment(ctx: Ctx, id: string) {
+  const { data, error } = await ctx.db.from("task_attachments").select(ATT_FIELDS).eq("id", id).eq("user_id", ctx.userId).maybeSingle();
+  if (error) throw new ToolErr(error.message);
+  if (!data) throw new ToolErr("Attachment not found.");
+  return data;
+}
 
 function toSchema(raw: z.ZodTypeAny): { schema: any; optional: boolean } {
   let t = raw;
