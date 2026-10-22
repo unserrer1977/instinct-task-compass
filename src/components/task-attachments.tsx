@@ -123,7 +123,7 @@ export function TaskAttachments({ taskId }: { taskId: string }) {
         </ul>
       )}
       {preview && (
-        <div role="dialog" aria-label={`Preview of ${preview.att.file_name}`} className="fixed inset-0 z-50 flex flex-col bg-foreground/80 p-3 sm:p-8" onClick={() => setPreview(null)}>
+        <div role="dialog" aria-label={`Preview of ${preview.att.file_name}`} className="fixed inset-0 z-[100] flex flex-col bg-foreground/80 p-3 sm:p-8" onClick={() => setPreview(null)}>
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-2 pb-2 text-background">
             <p className="min-w-0 break-words text-[14px] font-semibold">{preview.att.file_name}</p>
             <button aria-label="Close preview" className="shrink-0"><Icon name="close" /></button>
