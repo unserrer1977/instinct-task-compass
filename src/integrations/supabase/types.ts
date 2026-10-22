@@ -14,7 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mcp_credentials: {
+        Row: {
+          created_at: string
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          token_hash?: string
+          token_prefix?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      task_updates: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          progress: number | null
+          source: string
+          status: string | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          progress?: number | null
+          source?: string
+          status?: string | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          progress?: number | null
+          source?: string
+          status?: string | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_updates_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          autonomy: string
+          category: string
+          completed_at: string | null
+          created_at: string
+          current_step: string | null
+          deadline: string | null
+          description: string | null
+          external_ref: string | null
+          id: string
+          notes: string | null
+          priority: string
+          progress: number
+          result: string | null
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          autonomy?: string
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string | null
+          deadline?: string | null
+          description?: string | null
+          external_ref?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          progress?: number
+          result?: string | null
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          autonomy?: string
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string | null
+          deadline?: string | null
+          description?: string | null
+          external_ref?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          progress?: number
+          result?: string | null
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
