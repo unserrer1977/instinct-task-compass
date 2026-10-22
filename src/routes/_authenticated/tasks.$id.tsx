@@ -110,7 +110,7 @@ function TaskInspector() {
         <Meta icon="schedule" label="Created" value={formatTaskTimestamp(task.created_at)} />
         <Meta icon="update" label="Last activity" value={formatTaskTimestamp(task.updated_at)} />
         <Meta icon="event" label="Deadline" value={formatDateTime(task.deadline)} />
-        <Meta icon="task_alt" label="Completed" value={formatDateTime(task.completed_at)} />
+        <Meta icon="task_alt" label="Completed" value={formatTaskTimestamp(task.completed_at)} />
         <Meta icon="flag" label="Priority" value={task.priority} />
         <Meta icon="verified_user" label="Autonomy" value={task.autonomy.replace(/_/g, " ")} />
       </div>
