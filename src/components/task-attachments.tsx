@@ -67,7 +67,7 @@ export function TaskAttachments({ taskId }: { taskId: string }) {
       const hash = await sha256Hex(buf);
       if (items.some((i) => (i as Att & { sha256?: string }).sha256 === hash)) { toast.info(`${f.name} is already attached`); continue; }
       const path = `${u.user!.id}/${taskId}/${crypto.randomUUID()}-${f.name.replace(/[^A-Za-z0-9._-]+/g, "_").slice(-120)}`;
-      const up = await supabase.storage.from(BUCKET).upload(path, f, { contentType: f.type || undefined });
+      const up = await supabase.storage.from(BUCKET).upload(path, f, f.type ? { contentType: f.type } : {});
       if (up.error) { toast.error(up.error.message); continue; }
       const { error } = await supabase.from("task_attachments").insert({ task_id: taskId, user_id: u.user!.id, file_name: f.name, mime_type: f.type || "application/octet-stream", size_bytes: f.size, storage_path: path, sha256: hash, source: "dashboard" });
       if (error) {

@@ -555,7 +555,7 @@ export const TOOLS: ToolDef[] = [
     run: async (ctx, a) => {
       const task = await findTask(ctx, a.id, a.external_ref);
       if (!!a.content_base64 === !!a.source_url) throw new ToolErr("Provide exactly one of content_base64 or source_url.");
-      let bytes: Uint8Array;
+      let bytes: Uint8Array<ArrayBuffer>;
       let mime = a.mime_type as string | undefined;
       if (a.content_base64) {
         try {
