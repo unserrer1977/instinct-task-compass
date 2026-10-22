@@ -51,6 +51,9 @@ export function useTaskSync() {
       .on("postgres_changes", { event: "*", schema: "public", table: "task_updates" }, () => {
         qc.invalidateQueries({ queryKey: ["task_updates"] });
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "task_attachments" }, () => {
+        qc.invalidateQueries({ queryKey: ["task_attachments"] });
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "mcp_credentials" }, () => {
         qc.invalidateQueries({ queryKey: ["mcp_credential"] });
       })
