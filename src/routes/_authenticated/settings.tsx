@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Settings · MCP Integration — Instinct Hub" },
       { name: "description", content: "Connect your Instinct AI assistant securely with an MCP key." },
       { property: "og:title", content: "Settings · MCP Integration — Instinct Hub" },

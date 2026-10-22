@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Icon } from "@/components/app-shell";
 import { categoryIcon, formatDateTime, relativeTime, statusMeta, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { TaskCardActions, useTaskActions } from "@/components/task-actions";
 
 export function StatusChip({ status, className }: { status: string; className?: string }) {
   const m = statusMeta(status);
@@ -36,11 +37,13 @@ export function ProgressBar({ value, tone = "primary" }: { value: number; tone?:
 
 export function TaskCard({ task }: { task: Task }) {
   const done = task.status === "completed";
+  const { selected } = useTaskActions();
   return (
+    <article className={cn("card-surface p-4 transition-shadow", selected.has(task.id) && "ring-2 ring-primary")}>
     <Link
       to="/tasks/$id"
       params={{ id: task.id }}
-      className="block card-surface p-4 hover:shadow-md transition-shadow active:scale-[0.995]"
+      className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -79,6 +82,8 @@ export function TaskCard({ task }: { task: Task }) {
         </span>
       </div>
     </Link>
+    <TaskCardActions task={task} />
+    </article>
   );
 }
 

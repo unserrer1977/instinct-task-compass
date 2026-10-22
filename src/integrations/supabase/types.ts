@@ -159,7 +159,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      change_task_status: {
+        Args: { p_ids: string[]; p_restore?: Json; p_status?: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

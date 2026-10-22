@@ -13,3 +13,4 @@
 - The Instinct MCP server is a hand-rolled stateless JSON-RPC endpoint at `/api/public/mcp` (logic in `src/lib/instinct-mcp.ts`), authenticated by revocable per-user API keys (`inst_…`, only SHA-256 hashes stored in `mcp_credentials`) — the user explicitly asked for generate/copy/revoke keys rather than OAuth.
 - After verifying the key hash, the MCP route uses the admin client and must scope every query by the key's `user_id`.
 - Dashboard data syncs live via realtime on `tasks`, `task_updates`, `mcp_credentials` (see `useTaskSync`), so MCP writes appear without reload.
+- Task-card status actions share a provider in AppShell and use the caller-scoped, security-invoker change_task_status RPC to atomically update tasks and audit history; Undo uses returned timestamps to reject overwriting newer changes.
