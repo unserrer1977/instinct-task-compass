@@ -48,7 +48,7 @@ export function normTs(v: string | null | undefined, field = "timestamp"): strin
 
 function latest(...values: (string | null | undefined)[]): string | null {
   const v = values.filter((x): x is string => !!x).sort();
-  return v.length ? v[v.length - 1] : null;
+  return v.length ? v[v.length - 1]! : null;
 }
 
 const EVENT = z
@@ -327,7 +327,7 @@ export const TOOLS: ToolDef[] = [
       const limit = a.limit ?? 25;
       const offset = a.offset ?? 0;
       const { data, error } = await q
-        .order(SORT_COL[a.sort ?? "activity"], { ascending: false, nullsFirst: false })
+        .order(SORT_COL[a.sort ?? "activity"] ?? "sort_activity_at", { ascending: false, nullsFirst: false })
         .order("id")
         .range(offset, offset + limit - 1);
       if (error) throw new ToolErr(error.message);
@@ -391,7 +391,7 @@ export const TOOLS: ToolDef[] = [
     input: z.object({ tasks: z.array(IMPORT_ITEM).min(1).max(50) }).strict(),
     annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: false },
     run: async (ctx, a) => {
-      const results = [];
+      const results: Record<string, unknown>[] = [];
       for (const [i, item] of (a.tasks as z.infer<typeof IMPORT_ITEM>[]).entries()) {
         try {
           let match: TaskRow | null = null;
