@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { recentUpdatesQuery } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
-import { EmptyState } from "@/components/task-bits";
-import { formatTaskTimestamp } from "@/lib/tasks";
+import { EmptyState, EventTime } from "@/components/task-bits";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
@@ -40,7 +39,7 @@ function History() {
                 <p className="line-clamp-2 text-[13px] text-muted-foreground">{u.message}</p>
                 <p className="mt-1 flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
                   <Icon name="schedule" className="text-[13px]" />
-                  <time dateTime={u.created_at}>{formatTaskTimestamp(u.created_at)}</time>
+                  <EventTime u={u} />
                   <span>· {u.source === "instinct" ? "Instinct" : "You"}</span>
                 </p>
               </div>

@@ -6,7 +6,7 @@ import type { Task, TaskUpdate } from "@/lib/tasks";
 export const tasksQuery = queryOptions({
   queryKey: ["tasks"],
   queryFn: async (): Promise<Task[]> => {
-    const { data, error } = await supabase.from("tasks").select("*").order("updated_at", { ascending: false });
+    const { data, error } = await supabase.from("tasks").select("*").order("sort_activity_at", { ascending: false });
     if (error) throw error;
     return data ?? [];
   },
@@ -20,7 +20,7 @@ export const taskUpdatesQuery = (taskId: string) =>
         .from("task_updates")
         .select("*")
         .eq("task_id", taskId)
-        .order("created_at", { ascending: true });
+        .order("effective_at", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
@@ -32,7 +32,7 @@ export const recentUpdatesQuery = queryOptions({
     const { data, error } = await supabase
       .from("task_updates")
       .select("*, tasks(title, category)")
-      .order("created_at", { ascending: false })
+      .order("effective_at", { ascending: false })
       .limit(60);
     if (error) throw error;
     return data ?? [];

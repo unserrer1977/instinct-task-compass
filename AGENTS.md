@@ -16,3 +16,4 @@
 - After verifying the key hash, the MCP route uses the admin client and must scope every query by the key's `user_id`.
 - Dashboard data syncs live via realtime on `tasks`, `task_updates`, `mcp_credentials` (see `useTaskSync`), so MCP writes appear without reload.
 - Task-card status actions share a provider in AppShell and use the caller-scoped, security-invoker change_task_status RPC to atomically update tasks and audit history; Undo uses returned timestamps to reject overwriting newer changes.
+- Tasks and task_updates separate real event times (`initiated_at`, `started_at`, `last_activity_at`, `completed_at`, `occurred_at`; NULL = unknown) from record/import times (`created_at`); sorting uses generated `sort_*_at`/`effective_at` columns, and the `touch_task` trigger never fills timestamps on Instinct inserts so historical imports are never overwritten with "now".

@@ -141,9 +141,11 @@ export type Database = {
       task_updates: {
         Row: {
           created_at: string
+          effective_at: string | null
           id: string
           kind: string
           message: string
+          occurred_at: string | null
           progress: number | null
           source: string
           status: string | null
@@ -152,9 +154,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          effective_at?: string | null
           id?: string
           kind?: string
           message: string
+          occurred_at?: string | null
           progress?: number | null
           source?: string
           status?: string | null
@@ -163,9 +167,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          effective_at?: string | null
           id?: string
           kind?: string
           message?: string
+          occurred_at?: string | null
           progress?: number | null
           source?: string
           status?: string | null
@@ -193,12 +199,18 @@ export type Database = {
           description: string | null
           external_ref: string | null
           id: string
+          initiated_at: string | null
+          last_activity_at: string | null
           notes: string | null
           priority: string
           progress: number
           result: string | null
+          sort_activity_at: string | null
+          sort_initiated_at: string | null
           source: string
+          started_at: string | null
           status: string
+          timestamp_notes: string | null
           title: string
           updated_at: string
           user_id: string
@@ -213,12 +225,18 @@ export type Database = {
           description?: string | null
           external_ref?: string | null
           id?: string
+          initiated_at?: string | null
+          last_activity_at?: string | null
           notes?: string | null
           priority?: string
           progress?: number
           result?: string | null
+          sort_activity_at?: string | null
+          sort_initiated_at?: string | null
           source?: string
+          started_at?: string | null
           status?: string
+          timestamp_notes?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -233,12 +251,18 @@ export type Database = {
           description?: string | null
           external_ref?: string | null
           id?: string
+          initiated_at?: string | null
+          last_activity_at?: string | null
           notes?: string | null
           priority?: string
           progress?: number
           result?: string | null
+          sort_activity_at?: string | null
+          sort_initiated_at?: string | null
           source?: string
+          started_at?: string | null
           status?: string
+          timestamp_notes?: string | null
           title?: string
           updated_at?: string
           user_id?: string

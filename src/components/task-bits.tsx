@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Icon } from "@/components/app-shell";
-import { categoryIcon, formatDateTime, formatTaskTimestamp, relativeTime, statusMeta, type Task } from "@/lib/tasks";
+import { eventTime, categoryIcon, formatDateTime, formatTaskTimestamp, relativeTime, statusMeta, wasImportedLater, type Task, type TaskUpdate } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { TaskCardActions, useTaskActions } from "@/components/task-actions";
 
@@ -78,7 +78,7 @@ export function TaskCard({ task }: { task: Task }) {
       <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
         <SourceBadge source={task.source} />
         <span className="font-mono">
-          {done ? `Done ${relativeTime(task.completed_at)}` : task.deadline ? `Due ${formatDateTime(task.deadline)}` : `Updated ${relativeTime(task.updated_at)}`}
+          {done ? `Done ${relativeTime(task.completed_at)}` : task.deadline ? `Due ${formatDateTime(task.deadline)}` : `Active ${relativeTime(task.sort_activity_at)}`}
         </span>
       </div>
       <TaskTimestamps task={task} />
@@ -88,11 +88,21 @@ export function TaskCard({ task }: { task: Task }) {
   );
 }
 
-export function TaskTimestamps({ task }: { task: Pick<Task, "created_at" | "updated_at"> }) {
+function Stamp({ label, iso, unknown = "Unknown" }: { label: string; iso: string | null; unknown?: string }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <dt className="font-semibold">{label}</dt>
+      <dd>{iso ? <time dateTime={iso}>{formatTaskTimestamp(iso)}</time> : <span className="italic">{unknown}</span>}</dd>
+    </div>
+  );
+}
+
+export function TaskTimestamps({ task }: { task: Pick<Task, "initiated_at" | "last_activity_at" | "created_at" | "source"> }) {
   return (
     <dl className="mt-3 grid gap-1 text-[11px] text-muted-foreground">
-      <div className="flex flex-wrap items-baseline gap-x-2"><dt className="font-semibold">Created</dt><dd><time dateTime={task.created_at}>{formatTaskTimestamp(task.created_at)}</time></dd></div>
-      <div className="flex flex-wrap items-baseline gap-x-2"><dt className="font-semibold">Last activity</dt><dd><time dateTime={task.updated_at}>{formatTaskTimestamp(task.updated_at)}</time></dd></div>
+      <Stamp label="Created" iso={task.initiated_at} unknown="Original date unknown" />
+      <Stamp label="Last activity" iso={task.last_activity_at} />
+      {wasImportedLater(task) && <Stamp label="Imported" iso={task.created_at} />}
     </dl>
   );
 }
@@ -119,5 +129,16 @@ export function SectionTitle({ icon, title, right }: { icon: string; title: stri
       </div>
       {right}
     </div>
+  );
+}
+
+/** A history entry's real time; flags entries whose real time is unknown (only the upload time is known). */
+export function EventTime({ u }: { u: Pick<TaskUpdate, "occurred_at" | "created_at" | "source"> }) {
+  const at = eventTime(u);
+  const unknown = !u.occurred_at && u.source === "instinct";
+  return (
+    <time dateTime={at} className="font-mono text-[11px] text-muted-foreground" title={unknown ? "Actual time unknown — this is when Instinct uploaded it" : `Recorded ${formatTaskTimestamp(u.created_at)}`}>
+      {unknown ? `Uploaded ${formatTaskTimestamp(at)}` : formatTaskTimestamp(at)}
+    </time>
   );
 }

@@ -73,9 +73,9 @@ export async function handleAssistant(request: Request) {
     }
     const updates = await db
       .from("task_updates")
-      .select("task_id,message,created_at,kind")
+      .select("task_id,message,occurred_at,created_at,kind")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
+      .order("effective_at", { ascending: false })
       .limit(100);
     if (updates.error) throw updates.error;
     const messages = [
