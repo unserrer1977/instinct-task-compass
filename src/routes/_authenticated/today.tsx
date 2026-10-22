@@ -6,6 +6,8 @@ import { EmptyState, ProgressBar, SectionTitle, SourceBadge, StatusChip } from "
 import { categoryIcon, relativeTime } from "@/lib/tasks";
 import { useMcpCredential } from "@/hooks/use-mcp-credential";
 import { connectionState } from "@/lib/mcp-token";
+import { TaskCardActions, TaskSelectionBar } from "@/components/task-actions";
+import { TaskCard } from "@/components/task-bits";
 
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({
@@ -45,6 +47,7 @@ function Today() {
   const doneToday = tasks.filter((t) => t.status === "completed" && t.completed_at && new Date(t.completed_at) >= startOfDay);
   const active = inProgress.length + review.length + waiting.length;
   const conn = connectionState(cred);
+  const liveTasks = [...inProgress, ...waiting].slice(0, 8);
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -99,6 +102,7 @@ function Today() {
         </Chip>
       </div>
 
+      <TaskSelectionBar tasks={[...review, ...liveTasks]} />
       <section className="flex flex-col gap-2">
         <SectionTitle
           icon="assignment_late"
@@ -121,6 +125,7 @@ function Today() {
               <Link to="/tasks/$id" params={{ id: t.id }} className="mt-3 inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-[13px] font-semibold text-primary-foreground">
                 Review <Icon name="arrow_forward" className="text-[16px]" />
               </Link>
+              <TaskCardActions task={t} />
             </div>
           ))
         )}
@@ -146,27 +151,8 @@ function Today() {
             action={<Link to="/delegate" className="mt-2 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground">Delegate a task</Link>}
           />
         ) : (
-          <div className="card-surface divide-y divide-border">
-            {[...inProgress, ...waiting].slice(0, 8).map((t) => (
-              <Link key={t.id} to="/tasks/$id" params={{ id: t.id }} className="flex items-start gap-3 p-3.5 hover:bg-surface-low/60 transition-colors">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-low text-primary">
-                  <Icon name={categoryIcon(t.category)} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-muted-foreground">{t.category}</span>
-                    {t.status === "in_progress" ? <span className="font-mono text-[12px] font-medium text-primary">{t.progress}%</span> : <StatusChip status={t.status} />}
-                  </div>
-                  <p className="truncate text-[14px] font-medium">{t.title}</p>
-                  <p className="mt-0.5 flex items-center gap-1 truncate text-[12px] text-muted-foreground">
-                    {t.status === "in_progress" && <Icon name="sync" className="text-[14px] animate-spin [animation-duration:3s]" />}
-                    {t.current_step ?? (t.status === "in_progress" ? "Working…" : "Waiting to start")}
-                  </p>
-                  {t.status === "in_progress" && <div className="mt-2"><ProgressBar value={t.progress} /></div>}
-                </div>
-                <SourceBadge source={t.source} />
-              </Link>
-            ))}
+          <div className="flex flex-col gap-3">
+            {liveTasks.map((t) => <TaskCard key={t.id} task={t} />)}
           </div>
         )}
       </section>
