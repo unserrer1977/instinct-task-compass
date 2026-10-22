@@ -14,6 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      assistant_access_state: {
+        Row: {
+          denied: boolean
+          reason: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          denied?: boolean
+          reason?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          denied?: boolean
+          reason?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      assistant_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: Json
+          message_id: string
+          topic_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: Json
+          message_id: string
+          topic_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: Json
+          message_id?: string
+          topic_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_topic_id_user_id_fkey"
+            columns: ["topic_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_topics"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      assistant_topics: {
+        Row: {
+          created_at: string
+          id: string
+          task_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          task_id?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          task_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_topics_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mcp_credentials: {
         Row: {
           created_at: string
