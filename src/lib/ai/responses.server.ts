@@ -5,13 +5,14 @@ import {
   createLovableAiGatewayRunIdFetch,
   getLovableAiGatewayRunId,
   withLovableAiGatewayRunIdHeader,
-} from "../../ai-apps-gateway-sdk/examples/run-id.ts";
+} from "./run-id.ts";
 
 export function createResponsesCall(
   request: Request,
   config: { baseURL: string; apiKey: string; model: string },
   messages: ModelMessage[],
   instructions?: string,
+  options?: Pick<Parameters<typeof streamText>[0], "tools" | "stopWhen" | "onError">,
 ) {
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
   const provider = createOpenAI({
@@ -26,6 +27,8 @@ export function createResponsesCall(
     // AI SDK 6 lacks `instructions`: rename this key to `system` there.
     ...(instructions ? { instructions } : {}),
     messages,
+    maxRetries: 0,
+    ...options,
     abortSignal: request.signal,
     providerOptions: {
       openai: {
@@ -43,6 +46,7 @@ export function createResponsesCall(
   });
   return {
     result,
+    runIdFetch,
     response: () =>
       withLovableAiGatewayRunIdHeader(result.toUIMessageStreamResponse({ sendReasoning: true }), runIdFetch),
   };
