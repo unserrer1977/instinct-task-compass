@@ -16,6 +16,7 @@ import { Route as AuthenticatedDelegateRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
 import { Route as AuthenticatedTasksIdRouteImport } from './routes/_authenticated/tasks.$id'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
@@ -54,6 +55,11 @@ const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   path: '/today',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/_authenticated/tasks/$id': typeof AuthenticatedTasksIdRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/settings'
     | '/today'
+    | '/api/assistant'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks/'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/settings'
     | '/today'
+    | '/api/assistant'
     | '/tasks/$id'
     | '/api/public/mcp'
     | '/tasks'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/settings'
     | '/_authenticated/today'
+    | '/api/assistant'
     | '/_authenticated/tasks/$id'
     | '/api/public/mcp'
     | '/_authenticated/tasks/'
@@ -146,6 +158,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAssistantRoute: typeof ApiAssistantRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
 }
 
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodayRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
@@ -249,6 +269,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAssistantRoute: ApiAssistantRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
 }
 export const routeTree = rootRouteImport
