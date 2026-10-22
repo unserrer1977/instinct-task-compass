@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Task Inspector — Instinct Hub" },
       { name: "description", content: "Full detail, progress history and results for a delegated task." },
       { property: "og:title", content: "Task Inspector — Instinct Hub" },
@@ -56,8 +58,8 @@ function TaskInspector() {
   }
 
   async function addNote() {
-    if (!note.trim()) return;
-    await patch({ notes: task!.notes ? `${task!.notes}\n\n${note.trim()}` : note.trim() }, note.trim());
+    if (!note.trim() || !task) return;
+    await patch({ notes: task.notes ? `${task.notes}\n\n${note.trim()}` : note.trim() }, note.trim());
     setNote("");
     toast.success("Note added — Instinct will see it next time it reads this task");
   }

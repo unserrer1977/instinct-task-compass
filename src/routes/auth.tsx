@@ -16,6 +16,8 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Sign in — Instinct Hub" },
       { name: "description", content: "Sign in to your Instinct task dashboard." },
       { property: "og:title", content: "Sign in — Instinct Hub" },

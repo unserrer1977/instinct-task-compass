@@ -8,6 +8,8 @@ import { formatDateTime } from "@/lib/tasks";
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "History — Instinct Hub" },
       { name: "description", content: "A timeline of every update Instinct and you have made to your tasks." },
       { property: "og:title", content: "History — Instinct Hub" },

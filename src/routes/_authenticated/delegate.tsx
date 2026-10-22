@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/delegate")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "New Delegation — Instinct Hub" },
       { name: "description", content: "Hand a new objective to Instinct with guardrails and a deadline." },
       { property: "og:title", content: "New Delegation — Instinct Hub" },

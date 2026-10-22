@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCurrentUser, useTasks } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
-import { EmptyState, ProgressBar, SectionTitle, SourceBadge, StatusChip } from "@/components/task-bits";
+import { EmptyState, SectionTitle } from "@/components/task-bits";
 import { categoryIcon, relativeTime } from "@/lib/tasks";
 import { useMcpCredential } from "@/hooks/use-mcp-credential";
 import { connectionState } from "@/lib/mcp-token";
@@ -12,6 +12,8 @@ import { TaskCard } from "@/components/task-bits";
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Today — Instinct Hub" },
       { name: "description", content: "What Instinct is working on right now and what needs your sign-off." },
       { property: "og:title", content: "Today — Instinct Hub" },

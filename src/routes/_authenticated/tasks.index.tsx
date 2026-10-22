@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/tasks/")({
   validateSearch: search,
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Tasks — Instinct Hub" },
       { name: "description", content: "Every task delegated to Instinct, filterable by status and category." },
       { property: "og:title", content: "Tasks — Instinct Hub" },
