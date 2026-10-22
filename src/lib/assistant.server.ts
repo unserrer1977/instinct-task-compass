@@ -41,7 +41,7 @@ export async function handleAssistant(request: Request) {
       tasks.push(...page.data);
       if (page.data.length < 500) break;
     }
-    const updates = await db.from("task_updates").select("task_id,content,created_at,kind").eq("user_id", userId).order("created_at", { ascending: false }).limit(100);
+    const updates = await db.from("task_updates").select("task_id,message,created_at,kind").eq("user_id", userId).order("created_at", { ascending: false }).limit(100);
     if (updates.error) throw updates.error;
     const messages = [...(history.data ?? []).filter((row) => row.message_id !== last.id).map((row) => row.message as unknown as UIMessage), last];
     let topicId: string | null = null;
@@ -102,6 +102,6 @@ export async function handleAssistant(request: Request) {
     return await withLovableAiGatewayRunIdHeader(stream, call.runIdFetch);
   } catch (error) {
     if (request.signal.aborted) return new Response(null, { status: 499 });
-    return new Response(error instanceof Error ? error.message : "The task assistant could not load your tasks.", { status: 500 });
+    return new Response(error instanceof Error ? error.message : typeof error === "object" && error && "message" in error ? String(error.message) : "The task assistant could not load your tasks.", { status: 500 });
   }
 }
