@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/assistant")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => {
+  component: function AssistantPage() {
     const { data } = useSuspenseQuery(assistantQuery);
     return <TaskAssistant initial={data} />;
   },

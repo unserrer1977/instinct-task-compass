@@ -86,17 +86,15 @@ export async function handleAssistant(request: Request) {
     ];
     let topicId: string | null = null;
     const save = async (message: UIMessage) => {
-      const result = await db
-        .from("assistant_messages")
-        .upsert(
-          {
-            user_id: userId,
-            message_id: message.id,
-            topic_id: topicId,
-            message: message as unknown as Json,
-          },
-          { onConflict: "user_id,message_id" },
-        );
+      const result = await db.from("assistant_messages").upsert(
+        {
+          user_id: userId,
+          message_id: message.id,
+          topic_id: topicId,
+          message: message as unknown as Json,
+        },
+        { onConflict: "user_id,message_id" },
+      );
       if (result.error)
         throw new Error("Your conversation could not be saved: " + result.error.message);
     };
