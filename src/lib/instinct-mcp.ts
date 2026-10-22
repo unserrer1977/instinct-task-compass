@@ -391,7 +391,7 @@ export const TOOLS: ToolDef[] = [
     input: z.object({ tasks: z.array(IMPORT_ITEM).min(1).max(50) }).strict(),
     annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: false },
     run: async (ctx, a) => {
-      const results: Record<string, unknown>[] = [];
+      const results: ({ action: string } & Record<string, unknown>)[] = [];
       for (const [i, item] of (a.tasks as z.infer<typeof IMPORT_ITEM>[]).entries()) {
         try {
           let match: TaskRow | null = null;
