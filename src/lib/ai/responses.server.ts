@@ -9,14 +9,21 @@ import {
 
 export function createResponsesCall(
   request: Request,
-  config: { baseURL: string; apiKey: string; model: string; onGatewayResponse?: (response: Response) => Promise<void> },
+  config: {
+    baseURL: string;
+    apiKey: string;
+    model: string;
+    onGatewayResponse?: (response: Response) => Promise<void>;
+  },
   messages: ModelMessage[],
   instructions?: string,
   options?: Pick<Parameters<typeof streamText>[0], "tools" | "stopWhen" | "onError">,
 ) {
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
   let resolveHeaders: () => void = () => {};
-  const gatewayReady = new Promise<void>((resolve) => { resolveHeaders = resolve; });
+  const gatewayReady = new Promise<void>((resolve) => {
+    resolveHeaders = resolve;
+  });
   const provider = createOpenAI({
     baseURL: `${config.baseURL.replace(/\/+$/, "").replace(/\/v1$/, "")}/v1`,
     apiKey: config.apiKey,
@@ -26,7 +33,9 @@ export function createResponsesCall(
         const response = await runIdFetch.fetch(input, init);
         await config.onGatewayResponse?.(response);
         return response;
-      } finally { resolveHeaders(); }
+      } finally {
+        resolveHeaders();
+      }
     },
   });
   const reasoning = config.model !== "openai/chat-latest";
@@ -57,6 +66,9 @@ export function createResponsesCall(
     runIdFetch,
     gatewayReady,
     response: () =>
-      withLovableAiGatewayRunIdHeader(result.toUIMessageStreamResponse({ sendReasoning: true }), runIdFetch),
+      withLovableAiGatewayRunIdHeader(
+        result.toUIMessageStreamResponse({ sendReasoning: true }),
+        runIdFetch,
+      ),
   };
 }

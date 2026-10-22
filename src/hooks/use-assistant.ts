@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import type { UIMessage } from "ai";
 
 import type { Tables } from "@/integrations/supabase/types";
-export type AssistantData = { topics: Tables<"assistant_topics">[]; messages: UIMessage[]; assignments: Record<string, string> };
+export type AssistantData = {
+  topics: Tables<"assistant_topics">[];
+  messages: UIMessage[];
+  assignments: Record<string, string>;
+};
 
 export const assistantQuery = queryOptions({
   queryKey: ["assistant"],
@@ -14,6 +18,12 @@ export const assistantQuery = queryOptions({
     ]);
     if (topics.error) throw topics.error;
     if (messages.error) throw messages.error;
-    return { topics: topics.data ?? [], messages: (messages.data ?? []).map((row) => row.message as unknown as UIMessage), assignments: Object.fromEntries((messages.data ?? []).map((row) => [row.message_id, row.topic_id ?? ""])) as Record<string, string> };
+    return {
+      topics: topics.data ?? [],
+      messages: (messages.data ?? []).map((row) => row.message as unknown as UIMessage),
+      assignments: Object.fromEntries(
+        (messages.data ?? []).map((row) => [row.message_id, row.topic_id ?? ""]),
+      ) as Record<string, string>,
+    };
   },
 });
