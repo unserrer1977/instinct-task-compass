@@ -70,3 +70,13 @@ export function formatDateTime(iso: string | null | undefined): string {
     minute: "2-digit",
   });
 }
+
+export function formatTaskTimestamp(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+  }).format(date);
+}

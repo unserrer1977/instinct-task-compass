@@ -7,7 +7,7 @@ import { categoryIcon, relativeTime } from "@/lib/tasks";
 import { useMcpCredential } from "@/hooks/use-mcp-credential";
 import { connectionState } from "@/lib/mcp-token";
 import { TaskCardActions, TaskSelectionBar } from "@/components/task-actions";
-import { TaskCard } from "@/components/task-bits";
+import { TaskCard, TaskTimestamps } from "@/components/task-bits";
 
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({
@@ -128,6 +128,7 @@ function Today() {
                 Review <Icon name="arrow_forward" className="text-[16px]" />
               </Link>
               <TaskCardActions task={t} />
+              <TaskTimestamps task={t} />
             </div>
           ))
         )}

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { taskUpdatesQuery, useTasks } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
 import { ProgressBar, SourceBadge, StatusChip } from "@/components/task-bits";
-import { categoryIcon, formatDateTime, isOpen, statusMeta, TASK_STATUSES, type Task } from "@/lib/tasks";
+import { categoryIcon, formatDateTime, formatTaskTimestamp, isOpen, statusMeta, TASK_STATUSES, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
@@ -107,8 +107,8 @@ function TaskInspector() {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <Meta icon="schedule" label="Requested" value={formatDateTime(task.created_at)} />
-        <Meta icon="update" label="Last update" value={formatDateTime(task.updated_at)} />
+        <Meta icon="schedule" label="Created" value={formatTaskTimestamp(task.created_at)} />
+        <Meta icon="update" label="Last activity" value={formatTaskTimestamp(task.updated_at)} />
         <Meta icon="event" label="Deadline" value={formatDateTime(task.deadline)} />
         <Meta icon="task_alt" label="Completed" value={formatDateTime(task.completed_at)} />
         <Meta icon="flag" label="Priority" value={task.priority} />
@@ -145,7 +145,7 @@ function TaskInspector() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-semibold text-muted-foreground">{u.source === "instinct" ? "Instinct" : "You"}{u.progress != null ? ` · ${u.progress}%` : ""}</span>
-                  <span className="font-mono text-[11px] text-muted-foreground">{formatDateTime(u.created_at)}</span>
+                  <time dateTime={u.created_at} className="font-mono text-[11px] text-muted-foreground">{formatTaskTimestamp(u.created_at)}</time>
                 </div>
                 <p className="mt-0.5 whitespace-pre-wrap text-[13px]">{u.message}</p>
               </div>

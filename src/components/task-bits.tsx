@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Icon } from "@/components/app-shell";
-import { categoryIcon, formatDateTime, relativeTime, statusMeta, type Task } from "@/lib/tasks";
+import { categoryIcon, formatDateTime, formatTaskTimestamp, relativeTime, statusMeta, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { TaskCardActions, useTaskActions } from "@/components/task-actions";
 
@@ -81,9 +81,19 @@ export function TaskCard({ task }: { task: Task }) {
           {done ? `Done ${relativeTime(task.completed_at)}` : task.deadline ? `Due ${formatDateTime(task.deadline)}` : `Updated ${relativeTime(task.updated_at)}`}
         </span>
       </div>
+      <TaskTimestamps task={task} />
     </Link>
     <TaskCardActions task={task} />
     </article>
+  );
+}
+
+export function TaskTimestamps({ task }: { task: Pick<Task, "created_at" | "updated_at"> }) {
+  return (
+    <dl className="mt-3 grid gap-1 text-[11px] text-muted-foreground">
+      <div className="flex flex-wrap items-baseline gap-x-2"><dt className="font-semibold">Created</dt><dd><time dateTime={task.created_at}>{formatTaskTimestamp(task.created_at)}</time></dd></div>
+      <div className="flex flex-wrap items-baseline gap-x-2"><dt className="font-semibold">Last activity</dt><dd><time dateTime={task.updated_at}>{formatTaskTimestamp(task.updated_at)}</time></dd></div>
+    </dl>
   );
 }
 
