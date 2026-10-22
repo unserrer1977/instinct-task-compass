@@ -236,6 +236,9 @@ async function updateTaskRecord(ctx: Ctx, task: TaskRow, a: any): Promise<{ task
       occurred_at: occurred !== undefined ? occurred : historical ? null : new Date().toISOString(),
     });
   }
+  if (intended.initiated_at !== undefined) {
+    await ctx.db.from("task_updates").update({ occurred_at: intended.initiated_at }).eq("task_id", task.id).eq("user_id", ctx.userId).eq("kind", "created").eq("source", "instinct");
+  }
   const events_added = await importEvents(ctx, task.id, history);
   return { task: updated, events_added };
 }
