@@ -122,7 +122,7 @@ function Today() {
                 </span>
                 <span className="font-mono text-[11px] text-muted-foreground">{relativeTime(t.sort_activity_at)}</span>
               </div>
-              <h3 className="mt-1.5 text-[15px] font-semibold tracking-tight">{t.title}</h3>
+              <h3 className="mt-1.5 text-[15px] font-semibold tracking-tight break-words [overflow-wrap:anywhere]">{t.title}</h3>
               {(t.current_step || t.description) && <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{t.current_step ?? t.description}</p>}
               <Link to="/tasks/$id" params={{ id: t.id }} className="mt-3 inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-[13px] font-semibold text-primary-foreground">
                 Review <Icon name="arrow_forward" className="text-[16px]" />
