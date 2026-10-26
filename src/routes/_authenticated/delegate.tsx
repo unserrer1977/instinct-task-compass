@@ -8,6 +8,7 @@ import { CATEGORIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/delegate")({
+  validateSearch: (s: Record<string, unknown>): { prompt?: string } => (typeof s["prompt"] === "string" ? { prompt: s["prompt"] } : {}),
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
@@ -30,8 +31,9 @@ const AUTONOMY = [
 function Delegate() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [prompt, setPrompt] = useState("");
+  const initial = Route.useSearch().prompt ?? "";
+  const [title, setTitle] = useState(initial.slice(0, 120));
+  const [prompt, setPrompt] = useState(initial);
   const [category, setCategory] = useState<string>("Work & Research");
   const [autonomy, setAutonomy] = useState("requires_approval");
   const [deadline, setDeadline] = useState("");
