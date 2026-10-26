@@ -19,7 +19,7 @@ export const PLATFORMS = [
   { key: "slack", label: "Slack", match: /\bslack\b/i, slug: "slack", logo: "", color: "E01E5A" },
   { key: "homeassistant", label: "Home Assistant", match: /\bhome assistant\b/i, slug: "homeassistant", logo: "", color: "18BCF2" },
   { key: "zapier", label: "Zapier", match: /\bzapier\b/i, slug: "zapier", logo: "", color: "FF4F00" },
-  { key: "n8n", label: "n8n", match: /\bn8n\b/i, slug: "n8n", color: "EA4B71" },
+  { key: "n8n", label: "n8n", match: /\bn8n\b/i, slug: "n8n", logo: "", color: "EA4B71" },
 ] as const;
 
 export function detectPlatforms(t: Pick<Task, "title" | "description" | "notes" | "current_step">) {
