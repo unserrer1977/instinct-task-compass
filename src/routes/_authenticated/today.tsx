@@ -136,7 +136,7 @@ function AttentionCard({ task: t }: { task: Task }) {
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <button disabled={busy} onClick={() => void change([t.id], "completed")} className="rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground disabled:opacity-60">
-            Approve
+            Done
           </button>
           <Link to="/tasks/$id" params={{ id: t.id }} aria-label={`View ${t.title}`} className="p-2 text-muted-foreground hover:text-foreground">
             <Icon name="visibility" />
