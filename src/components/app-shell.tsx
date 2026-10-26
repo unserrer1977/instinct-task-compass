@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useTaskSync, useCurrentUser } from "@/hooks/use-tasks";
 import { cn } from "@/lib/utils";
 import { TaskActionsProvider } from "@/components/task-actions";
+import { LayoutDashboard, ListTodo, History, Settings, MessageSquare, Plus } from "lucide-react";
 
 const LOGO =
   "https://lh3.googleusercontent.com/aida/AEtjO1XNdwqKDvIl9I17vJtOe1My9WIfrEQWi_flLbpXu6Ig46qYzSE9oi1hbqvJYXq2FzGMnmVN_YWBnn3ZJMaVG9aDXC8C6qQHlelY2Bv7SWZ5OfdpyJa_w-Zb7B6eoSyevuU_gVRAiFtzQjmYPGQ0NHuY8oD2zImABvACdqa-kp6-cYjxqhgRzPZ-kj32tLPQN51vWoZ8_So5x2JxlTkCeIfCdJFvbuYuLIX3LRpKx3QWGg_iif4_BUQheII";
@@ -25,6 +26,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: user } = useCurrentUser();
   const initial = (user?.user_metadata?.["full_name"] ?? user?.email ?? "?").charAt(0).toUpperCase();
   const avatar = user?.user_metadata?.["avatar_url"] as string | undefined;
+
+  if (path === "/today") return (
+    <div className="control-centre min-h-screen bg-background text-foreground">
+      <main className="mx-auto max-w-[1600px] px-4 pb-24 pt-5 md:px-8 lg:px-10"><TaskActionsProvider>{children}</TaskActionsProvider></main>
+      <nav aria-label="Main navigation" className="cc-navigation fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-3xl items-center justify-around py-3">
+          {([{ to: "/today", label: "Today", icon: LayoutDashboard }, { to: "/tasks", label: "Tasks", icon: ListTodo }, { to: "/delegate", label: "Delegate", icon: Plus }, { to: "/assistant", label: "Ask Instinct", icon: MessageSquare }, { to: "/history", label: "History", icon: History }, { to: "/settings", label: "Settings", icon: Settings }] as const).map((item) => <Link key={item.to} to={item.to} className={cn("flex flex-col items-center gap-1 text-[10px] sm:text-xs", item.to === path ? "text-primary" : "text-muted-foreground")}><item.icon className="size-5" />{item.label}</Link>)}
+        </div>
+      </nav>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
