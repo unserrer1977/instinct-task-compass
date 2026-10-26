@@ -24,7 +24,7 @@ export function detectPlatforms(t: Pick<Task, "title" | "description" | "notes" 
   return PLATFORMS.filter((p) => p.match.test(text));
 }
 
-export function PlatformBadge({ p, compact }: { p: (typeof PLATFORMS)[number]; compact?: boolean }) {
+export function PlatformBadge({ p, compact }: { p: (typeof PLATFORMS)[number]; compact?: boolean | undefined }) {
   const style = { color: `#${p.color}`, borderColor: `#${p.color}66`, background: `#${p.color}1a` } as CSSProperties;
   return (
     <span title={p.label} style={style} className="cc-label inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5">
@@ -34,7 +34,7 @@ export function PlatformBadge({ p, compact }: { p: (typeof PLATFORMS)[number]; c
   );
 }
 
-export function PlatformBadges({ task, compact }: { task: Task; compact?: boolean }) {
+export function PlatformBadges({ task, compact }: { task: Task; compact?: boolean | undefined }) {
   const list = detectPlatforms(task);
   if (!list.length) return null;
   return <>{list.map((p) => <PlatformBadge key={p.key} p={p} compact={compact} />)}</>;
