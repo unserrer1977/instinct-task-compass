@@ -110,6 +110,6 @@ function Today() {
     </div>
   </div>;
 }
-function Filter({ label, value, options, change }: { label: string; value: string; options: string[][]; change: (v: string) => void }) {
+function Filter({ label, value, options, change }: { label: string; value: string; options: [string, string][]; change: (v: string) => void }) {
   return <div className="flex flex-wrap items-center gap-1.5"><span className="cc-label mr-1 text-muted-foreground">{label}</span>{options.map(([v, title]) => <Button key={v} variant={value === v ? "secondary" : "outline"} size="sm" aria-pressed={value === v} onClick={() => change(v)} className={cn("rounded-full text-xs", value === v && "bg-foreground text-background hover:bg-foreground/90")}>{title}</Button>)}</div>;
 }
