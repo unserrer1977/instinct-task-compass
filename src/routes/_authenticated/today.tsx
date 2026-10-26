@@ -8,7 +8,7 @@ import { TaskSelectionBar, TaskCardActions } from "@/components/task-actions";
 import { Button } from "@/components/ui/button";
 import { isOpen, relativeTime, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
-import { PlatformBadges } from "@/components/platform-badges";
+import { PlatformBadges, InstinctLogo } from "@/components/platform-badges";
 
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({ meta: [
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/today")({
 
 function Owner({ task }: { task: Task }) {
   return <span className={cn("cc-label inline-flex items-center gap-1.5 rounded-sm border px-2 py-1", task.source === "instinct" ? "border-primary/40 bg-primary-soft/40 text-primary" : "border-warning/40 bg-warning-soft/40 text-warning")}>
-    {task.source === "instinct" ? <Bot className="size-3" /> : <span className="size-1.5 bg-warning" />}{task.source === "instinct" ? "Instinct" : "You"}
+    {task.source === "instinct" ? <InstinctLogo /> : <span className="size-1.5 bg-warning" />}{task.source === "instinct" ? "Instinct" : "You"}
   </span>;
 }
 function Status({ task }: { task: Task }) {
