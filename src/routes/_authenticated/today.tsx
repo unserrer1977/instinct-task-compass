@@ -1,13 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useCurrentUser, useTasks } from "@/hooks/use-tasks";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useTasks } from "@/hooks/use-tasks";
 import { Icon } from "@/components/app-shell";
-import { EmptyState, SectionTitle } from "@/components/task-bits";
-import { categoryIcon, relativeTime } from "@/lib/tasks";
-import { useMcpCredential } from "@/hooks/use-mcp-credential";
-import { connectionState } from "@/lib/mcp-token";
-import { TaskCardActions, TaskSelectionBar } from "@/components/task-actions";
-import { TaskCard, TaskTimestamps } from "@/components/task-bits";
+import { EmptyState } from "@/components/task-bits";
+import { TaskSelectionBar, useTaskActions } from "@/components/task-actions";
+import { categoryIcon, type Task } from "@/lib/tasks";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({
@@ -23,153 +21,136 @@ export const Route = createFileRoute("/_authenticated/today")({
   component: Today,
 });
 
-function greeting() {
-  const h = new Date().getHours();
-  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-}
+const TONES = ["primary", "success", "info"] as const;
+const TONE_CLS = {
+  primary: { bar: "bg-primary", text: "text-primary", icon: "bg-primary-soft/60 text-primary" },
+  success: { bar: "bg-success", text: "text-success", icon: "bg-success-soft/40 text-success" },
+  info: { bar: "bg-info", text: "text-info", icon: "bg-info-soft/50 text-info" },
+};
 
 function Today() {
   const { data: tasks = [], isLoading } = useTasks();
-  const { data: user } = useCurrentUser();
-  const { data: cred } = useMcpCredential();
-  const [clock, setClock] = useState("");
-  useEffect(() => {
-    const t = () => setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    t();
-    const i = setInterval(t, 30000);
-    return () => clearInterval(i);
-  }, []);
-
-  const name = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
+  const navigate = useNavigate();
+  const [cmd, setCmd] = useState("");
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
-  const inProgress = tasks.filter((t) => t.status === "in_progress");
+
   const review = tasks.filter((t) => t.status === "needs_review");
-  const waiting = tasks.filter((t) => t.status === "queued" || t.status === "scheduled");
+  const active = tasks.filter((t) => t.status === "in_progress" || t.status === "queued" || t.status === "scheduled");
   const doneToday = tasks.filter((t) => t.status === "completed" && t.completed_at && new Date(t.completed_at) >= startOfDay);
-  const active = inProgress.length + review.length + waiting.length;
-  const conn = connectionState(cred);
-  const liveTasks = [...inProgress, ...waiting].slice(0, 8);
+  const stream = [...active, ...doneToday].slice(0, 8);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = cmd.trim();
+    void navigate({ to: "/delegate", search: v ? { prompt: v } : {} });
+  };
 
   return (
-    <div className="flex flex-col gap-4 py-2">
-      <div className="relative overflow-hidden card-surface p-4">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary-soft/40 blur-2xl" />
-        <div className="pointer-events-none absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-success-glow/20 blur-xl" />
-        <div className="relative flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <Link to="/settings" className="flex items-center gap-1.5">
-              <span className="label-caps text-primary">{conn === "connected" ? "Autonomous Sync" : "Instinct Link"}</span>
-              <span className={`inline-block h-1.5 w-1.5 rounded-full ${conn === "connected" ? "bg-primary animate-pulse" : "bg-outline bg-muted-foreground"}`} />
-              {conn !== "connected" && <span className="text-[11px] text-muted-foreground">{conn === "not_configured" ? "not set up" : conn === "awaiting" ? "awaiting first call" : "idle"}</span>}
-            </Link>
-            <span className="font-mono text-[12px] text-muted-foreground">{clock}</span>
-          </div>
-          <h1 className="text-[22px] leading-7 font-semibold tracking-tight">
-            {greeting()}{name ? `, ${name}` : ""}
-          </h1>
-          <div className="mt-1 flex items-start gap-2.5 rounded-lg bg-surface-low p-2.5">
-            <span className="flex shrink-0 items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
-              <Icon name="psychology" className="text-[18px]" />
-            </span>
-            <div className="flex flex-col">
-              <p className="text-sm leading-snug">
-                Monitoring <span className="font-bold text-primary">{active} active task{active === 1 ? "" : "s"}</span>
-              </p>
-              <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
-                <span className={`h-1.5 w-1.5 rounded-full ${review.length ? "bg-destructive" : "bg-success"}`} />
-                {review.length ? `${review.length} require${review.length === 1 ? "s" : ""} your sign-off before proceeding` : "Nothing needs your sign-off"}
-              </p>
-            </div>
-          </div>
+    <div className="flex flex-col gap-6 py-3 pb-24">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
+        <Pill to="needs_review" dot="bg-warning" cls="bg-warning-soft text-on-warning-soft">{review.length} Pending Sign-off</Pill>
+        <Pill to="in_progress" dot="bg-primary" cls="bg-primary-soft/60 text-primary">{active.length} Active Automations</Pill>
+        <Pill to="completed" dot="bg-success" cls="bg-success-soft/40 text-on-success-soft">{doneToday.length} Completed Today</Pill>
+      </div>
+
+      <TaskSelectionBar tasks={review} />
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[20px] font-medium tracking-tight">Needs Attention</h2>
+          <span className="text-[13px] font-semibold text-muted-foreground">{review.length} item{review.length === 1 ? "" : "s"}</span>
         </div>
-      </div>
-
-      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
-        <Chip to="in_progress" className="bg-info-soft/50 text-on-info-soft">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-info-glow opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-info" />
-          </span>
-          {inProgress.length} In Progress
-        </Chip>
-        <Chip to="needs_review" className="bg-destructive-soft/60 text-on-destructive-soft">
-          <Icon name="priority_high" className="text-[15px]" /> {review.length} Needs Review
-        </Chip>
-        <Chip to="completed" className="bg-success-soft/40 text-on-success-soft">
-          <Icon name="check_circle" className="text-[15px]" /> {doneToday.length} Done Today
-        </Chip>
-        <Chip to="queued" className="bg-surface-high text-muted-foreground">
-          <Icon name="schedule" className="text-[15px]" /> {waiting.length} Waiting
-        </Chip>
-      </div>
-
-      <TaskSelectionBar tasks={[...review, ...liveTasks]} />
-      <section className="flex flex-col gap-2">
-        <SectionTitle
-          icon="assignment_late"
-          title="Needs Your Review"
-          right={review.length > 0 && <span className="rounded-full bg-destructive-soft px-2 py-0.5 text-[11px] font-semibold text-on-destructive-soft">{review.length} pending</span>}
-        />
         {review.length === 0 ? (
-          <p className="rounded-lg bg-card/70 px-3 py-3 text-[13px] text-muted-foreground">All clear — Instinct isn't waiting on you.</p>
+          <p className="rounded-xl bg-card/70 px-4 py-4 text-[13px] text-muted-foreground">All clear — Instinct isn't waiting on you.</p>
         ) : (
-          review.map((t) => (
-            <div key={t.id} className="card-surface border-l-4 border-destructive p-4">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
-                  <Icon name={categoryIcon(t.category)} className="text-[14px]" /> {t.category}
-                </span>
-                <span className="font-mono text-[11px] text-muted-foreground">{relativeTime(t.sort_activity_at)}</span>
-              </div>
-              <h3 className="mt-1.5 text-[15px] font-semibold tracking-tight break-words [overflow-wrap:anywhere]">{t.title}</h3>
-              {(t.current_step || t.description) && <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{t.current_step ?? t.description}</p>}
-              <Link to="/tasks/$id" params={{ id: t.id }} className="mt-3 inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-[13px] font-semibold text-primary-foreground">
-                Review <Icon name="arrow_forward" className="text-[16px]" />
-              </Link>
-              <TaskCardActions task={t} />
-              <TaskTimestamps task={t} />
-            </div>
-          ))
+          review.map((t) => <AttentionCard key={t.id} task={t} />)
         )}
       </section>
 
-      <section className="flex flex-col gap-2">
-        <SectionTitle
-          icon="dynamic_feed"
-          title="Live Activity Stream"
-          right={
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Real-time
-            </span>
-          }
-        />
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[20px] font-medium tracking-tight">Live Automation Stream</h2>
+          <Link to="/tasks" className="text-[13px] font-semibold text-primary">View all</Link>
+        </div>
         {isLoading ? (
-          <div className="h-24 animate-pulse rounded-xl bg-surface-mid" />
-        ) : inProgress.length + waiting.length === 0 ? (
-          <EmptyState
-            icon="auto_awesome"
-            title="Nothing running"
-            body="Ask Instinct to do something, or delegate a task here — it will show up live."
-            action={<Link to="/delegate" className="mt-2 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground">Delegate a task</Link>}
-          />
+          <div className="h-40 animate-pulse rounded-2xl bg-surface-mid" />
+        ) : stream.length === 0 ? (
+          <EmptyState icon="auto_awesome" title="Nothing running" body="Ask Instinct to do something, or delegate a task below — it will show up live." />
         ) : (
-          <div className="flex flex-col gap-3">
-            {liveTasks.map((t) => <TaskCard key={t.id} task={t} />)}
+          <div className="rounded-2xl bg-card p-2 shadow-sm">
+            {stream.map((t, i) => {
+              const done = t.status === "completed";
+              const tone = TONE_CLS[done ? "success" : TONES[i % 3] ?? "primary"];
+              const pct = done ? 100 : Math.max(0, Math.min(100, t.progress ?? 0));
+              return (
+                <Link key={t.id} to="/tasks/$id" params={{ id: t.id }} className={cn("flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-surface-low", i > 0 && "border-t border-border")}>
+                  <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", done ? "bg-primary-soft/60 text-primary" : tone.icon)}>
+                    <Icon name={done ? "check_circle" : categoryIcon(t.category)} className="text-[20px]" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className={cn("text-[15px] break-words [overflow-wrap:anywhere]", done && "text-muted-foreground")}>{t.title}</span>
+                      <span className={cn("shrink-0 font-mono text-[12px]", tone.text)}>{done ? "Done" : `${pct}%`}</span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-high">
+                      <div className={cn("h-full rounded-full transition-all", tone.bar)} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>
+
+      <form onSubmit={submit} className="fixed inset-x-0 bottom-24 z-40 mx-auto w-full max-w-3xl px-4">
+        <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-2 pl-4 shadow-lg">
+          <Icon name="auto_awesome" className="text-primary" />
+          <input value={cmd} onChange={(e) => setCmd(e.target.value)} placeholder="Delegate a task or ask Instinct…" className="h-10 min-w-0 flex-1 bg-transparent text-[15px] outline-none" />
+          <Link to="/assistant" aria-label="Ask Instinct" className="p-2 text-muted-foreground hover:text-foreground"><Icon name="forum" /></Link>
+          <button type="submit" aria-label="Delegate" className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <Icon name="arrow_upward" />
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
 
-function Chip({ to, className, children }: { to: string; className: string; children: React.ReactNode }) {
+function AttentionCard({ task: t }: { task: Task }) {
+  const { busy, change } = useTaskActions();
   return (
-    <Link
-      to="/tasks"
-      search={{ status: to }}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-sm active:scale-95 transition-transform ${className}`}
-    >
+    <div className="relative overflow-hidden rounded-2xl bg-card p-4 pl-5 shadow-sm">
+      <span className="absolute inset-y-0 left-0 w-1 bg-warning" />
+      <div className="flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-warning-soft text-on-warning-soft">
+          <Icon name={categoryIcon(t.category)} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[15px] font-medium break-words [overflow-wrap:anywhere]">{t.title}</p>
+            <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-[11px] font-semibold text-on-warning-soft">Review</span>
+          </div>
+          {(t.current_step || t.description) && <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{t.current_step ?? t.description}</p>}
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <button disabled={busy} onClick={() => void change([t.id], "completed")} className="rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground disabled:opacity-60">
+            Approve
+          </button>
+          <Link to="/tasks/$id" params={{ id: t.id }} aria-label={`View ${t.title}`} className="p-2 text-muted-foreground hover:text-foreground">
+            <Icon name="visibility" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Pill({ to, dot, cls, children }: { to: string; dot: string; cls: string; children: React.ReactNode }) {
+  return (
+    <Link to="/tasks" search={{ status: to }} className={cn("flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold", cls)}>
+      <span className={cn("h-2 w-2 rounded-full", dot)} />
       {children}
     </Link>
   );

@@ -37,6 +37,9 @@
   --color-success-soft: var(--success-soft);
   --color-success-glow: var(--success-glow);
   --color-on-success-soft: var(--on-success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-on-warning-soft: var(--on-warning-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
   --color-info-glow: var(--info-glow);
@@ -79,6 +82,9 @@
   --success-soft: oklch(0.895 0.15 162.2);
   --success-glow: oklch(0.809 0.15 162.3);
   --on-success-soft: oklch(0.388 0.085 162);
+  --warning: oklch(0.75 0.16 65);
+  --warning-soft: oklch(0.95 0.04 75);
+  --on-warning-soft: oklch(0.5 0.13 50);
   --info: oklch(0.48 0.105 237.1);
   --info-soft: oklch(0.912 0.046 244.3);
   --info-glow: oklch(0.745 0.146 237.8);
