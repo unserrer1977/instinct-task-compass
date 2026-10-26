@@ -4,3 +4,5 @@
 - [x] Add secure AI-powered task answers with automatic topic organisation and account history.
 - [x] Add unified assistant interface and topic viewing.
 - [x] Verify grounded answers, history restoration, and access protection.
+- [ ] Implement the uploaded Control Centre design using existing task data and controls.
+- [ ] Verify dashboard filters, task navigation, and small-screen layout.
