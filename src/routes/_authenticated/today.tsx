@@ -81,7 +81,7 @@ function Today() {
           <div className="rounded-2xl bg-card p-2 shadow-sm">
             {stream.map((t, i) => {
               const done = t.status === "completed";
-              const tone = TONE_CLS[done ? "success" : TONES[i % 3]];
+              const tone = TONE_CLS[done ? "success" : TONES[i % 3] ?? "primary"];
               const pct = done ? 100 : Math.max(0, Math.min(100, t.progress ?? 0));
               return (
                 <Link key={t.id} to="/tasks/$id" params={{ id: t.id }} className={cn("flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-surface-low", i > 0 && "border-t border-border")}>
