@@ -204,8 +204,8 @@
 }
 .cc-heading { font-family: var(--font-display); font-weight: 800; letter-spacing: 0; }
 .cc-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0; }
-.cc-matrix { display: grid; grid-template-columns: 190px repeat(var(--cc-columns), minmax(100px, 1fr)) 65px; gap: 6px; }
-.cc-row { display: grid; grid-template-columns: 95px minmax(0, 1fr) 145px; gap: 16px; align-items: start; }
+.cc-matrix { display: grid; grid-template-columns: 140px repeat(var(--cc-columns), minmax(84px, 1fr)) 48px; gap: 4px; }
+.cc-row { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 10px; align-items: start; }
 @media (max-width: 700px) {
   .cc-row { grid-template-columns: 1fr; gap: 8px; }
   .cc-row-header { display: none; }
