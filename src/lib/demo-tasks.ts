@@ -2,7 +2,7 @@ import type { Task } from "@/lib/tasks";
 
 const H = 3600_000;
 const ago = (h: number) => new Date(Date.now() - h * H).toISOString();
-type Seed = [string, string, Task["status"], string, number, number, string?, string?];
+type Seed = [string, string, Task["status"], string, number, number, (string | undefined)?, string?];
 // [title, category, status, source, hoursAgoCreated, progress, current_step, description]
 const SEEDS: Seed[] = [
   ["Book flights London → Lisbon for May bank holiday", "Travel", "needs_review", "instinct", 30, 80, "Pick between 07:40 TAP or 10:15 easyJet", "Compare prices on Google Flights and confirm with Claude."],

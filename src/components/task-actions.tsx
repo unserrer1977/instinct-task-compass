@@ -27,7 +27,7 @@ export function useTaskActions() {
 export function TaskActionsProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
   const demo = useContext(DemoMode);
-  const key = demo ? ["demo-tasks"] : ["tasks"];
+  const key = demo ? ["tasks", "demo"] : ["tasks"];
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const lock = useRef(false);
