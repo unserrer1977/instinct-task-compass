@@ -29,9 +29,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (path === "/today") return (
     <div className="control-centre min-h-screen bg-background text-foreground">
-      <main className="mx-auto max-w-[1600px] px-4 pb-24 pt-5 md:px-8 lg:px-10"><TaskActionsProvider>{children}</TaskActionsProvider></main>
+      <main className="mx-auto max-w-[1680px] px-3 pb-20 pt-3 md:px-[18px]"><TaskActionsProvider>{children}</TaskActionsProvider></main>
       <nav aria-label="Main navigation" className="cc-navigation fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-around py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-around py-2">
           {([{ to: "/today", label: "Today", icon: LayoutDashboard }, { to: "/tasks", label: "Tasks", icon: ListTodo }, { to: "/delegate", label: "Delegate", icon: Plus }, { to: "/assistant", label: "Ask Instinct", icon: MessageSquare }, { to: "/history", label: "History", icon: History }, { to: "/settings", label: "Settings", icon: Settings }] as const).map((item) => <Link key={item.to} to={item.to} className={cn("flex flex-col items-center gap-1 text-[10px] sm:text-xs", item.to === path ? "text-primary" : "text-muted-foreground")}><item.icon className="size-5" />{item.label}</Link>)}
         </div>
       </nav>

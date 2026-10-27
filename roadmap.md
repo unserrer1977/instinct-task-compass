@@ -6,3 +6,5 @@
 - [x] Verify grounded answers, history restoration, and access protection.
 - [x] Implement the uploaded Control Centre design using existing task data and controls.
 - [x] Verify dashboard filters, task navigation, and small-screen layout.
+- [x] Implement the new Second Brain board design with live tasks and existing actions.
+- [x] Verify filters, task navigation, and desktop/mobile layouts.

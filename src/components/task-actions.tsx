@@ -71,15 +71,15 @@ export function TaskActionsProvider({ children }: { children: ReactNode }) {
   return <TaskActionsContext.Provider value={{ selected, busy, select: (ids, checked) => setSelected((old) => toggleTaskSelection(old, ids, checked)), change: (ids, status) => run(ids, status) }}>{children}</TaskActionsContext.Provider>;
 }
 
-export function TaskCardActions({ task }: { task: Task }) {
+export function TaskCardActions({ task, compact = false }: { task: Task; compact?: boolean }) {
   const { selected, select, busy, change } = useTaskActions();
   return (
-    <div className="flex items-center justify-between gap-3 border-t border-border pt-3 mt-3">
-      <label className="flex min-h-9 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+    <div className={`flex items-center justify-between gap-3 border-t border-border ${compact ? "pt-1.5 mt-1.5" : "pt-3 mt-3"}`}>
+      <label className={`flex cursor-pointer items-center gap-2 text-xs text-muted-foreground ${compact ? "min-h-7" : "min-h-9"}`}>
         <Checkbox aria-label={`Select ${task.title}`} checked={selected.has(task.id)} disabled={busy} onCheckedChange={(checked) => select([task.id], checked === true)} />
         Select
       </label>
-      <Button size="sm" disabled={busy || task.status === "completed"} onClick={() => { void change([task.id], "completed"); }} aria-label={`Mark ${task.title} Done`}>
+      <Button size="sm" className={compact ? "h-7 px-2 text-xs" : undefined} disabled={busy || task.status === "completed"} onClick={() => { void change([task.id], "completed"); }} aria-label={`Mark ${task.title} Done`}>
         {busy ? <LoaderCircle className="animate-spin" /> : <Check />} Done
       </Button>
     </div>
