@@ -47,7 +47,7 @@ function BoardCard({ task }: { task: Task }) {
   </article>;
 }
 
-function Today() {
+export function Today() {
   const { data: tasks = [], isLoading, error, dataUpdatedAt } = useTasks();
   const [query, setQuery] = useState("");
   const [agents, setAgents] = useState<string[]>([]);

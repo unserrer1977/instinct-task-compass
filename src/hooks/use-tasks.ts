@@ -1,4 +1,9 @@
-import { useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
+import { DEMO_TASKS } from "@/lib/demo-tasks";
+
+/** True inside the public /demo page: tasks come from local sample data, never the database. */
+export const DemoMode = createContext(false);
+export const demoTasksQuery = queryOptions({ queryKey: ["demo-tasks"], queryFn: async () => DEMO_TASKS, staleTime: Infinity });
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Task, TaskUpdate } from "@/lib/tasks";
@@ -65,7 +70,8 @@ export function useTaskSync() {
 }
 
 export function useTasks() {
-  return useQuery(tasksQuery);
+  const demo = useContext(DemoMode);
+  return useQuery<Task[]>(demo ? demoTasksQuery : tasksQuery);
 }
 
 export function useCurrentUser() {
