@@ -6,7 +6,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Search, Plus, Check, ChevronDown, Keyboard, ArrowUpRight, ArrowRight, Network, X, UserRound } from "lucide-react";
 import { useTasks } from "@/hooks/use-tasks";
 import { TaskTimestamps } from "@/components/task-bits";
-import { TaskSelectionBar, TaskCardActions } from "@/components/task-actions";
+import { TaskSelectionBar, TaskCardActions, useTaskActions } from "@/components/task-actions";
+import type { TaskStatus } from "@/lib/tasks";
 import { Button } from "@/components/ui/button";
 import { isOpen, relativeTime, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/today")({
 
 function BoardCard({ task }: { task: Task }) {
   const waiting = task.status === "needs_review", done = task.status === "completed";
-  return <article className={cn("cc-board-card min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
+  return <article draggable onDragStart={e => { e.dataTransfer.setData("text/task-id", task.id); e.dataTransfer.effectAllowed = "move"; }} className={cn("cc-board-card cursor-grab active:cursor-grabbing min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
     <Link to="/tasks/$id" params={{ id: task.id }} className={cn("group flex items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
       <h3 className="min-w-0 flex-1 break-words [overflow-wrap:anywhere]">{task.title}</h3><ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground group-hover:text-primary" />
     </Link>
@@ -86,11 +87,13 @@ function Today() {
   const hasFilters = query.trim() || agents.length || categories.length || view !== "all";
   const clear = () => { setQuery(""); setAgents([]); setCategories([]); setView("all"); };
   const filtered = tasks.filter(t => t.status !== "cancelled" && (view === "all" || (view === "done" ? t.status === "completed" : isOpen(t))) && (!agents.length || taskAgents(t).some(a => agents.includes(a))) && (!categories.length || categories.includes(t.category)) && [t.title, t.description, t.notes, t.current_step, t.category, ...taskAgents(t)].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const { change } = useTaskActions();
+  const [dragOver, setDragOver] = useState<string | null>(null);
   const columns = [
-    { key: "backlog", name: "Backlog", hint: "Not started", dot: "border border-muted-foreground", rows: filtered.filter(t => t.status === "queued" || t.status === "scheduled") },
-    { key: "waiting", name: "Waiting on you", hint: "Your move", dot: "rotate-45 rounded-sm bg-warning", rows: filtered.filter(t => t.status === "needs_review") },
-    { key: "active", name: "In progress", hint: "Agents on it", dot: "bg-info motion-safe:animate-pulse", rows: filtered.filter(t => t.status === "in_progress") },
-    { key: "done", name: "Done", hint: "Completed", dot: "bg-success", rows: filtered.filter(t => t.status === "completed") },
+    { key: "backlog", name: "Backlog", hint: "Not started", status: "queued" as TaskStatus, dot: "border border-muted-foreground", rows: filtered.filter(t => t.status === "queued" || t.status === "scheduled") },
+    { key: "waiting", name: "Needs you", hint: "Your move", status: "needs_review" as TaskStatus, dot: "rotate-45 rounded-sm bg-warning", rows: filtered.filter(t => t.status === "needs_review") },
+    { key: "active", name: "Being done", hint: "Agents on it", status: "in_progress" as TaskStatus, dot: "bg-info motion-safe:animate-pulse", rows: filtered.filter(t => t.status === "in_progress") },
+    { key: "done", name: "Done", hint: "Completed", status: "completed" as TaskStatus, dot: "bg-success", rows: filtered.filter(t => t.status === "completed") },
   ];
   return <div className="flex flex-col gap-3">
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -113,6 +116,6 @@ function Today() {
       <Popover open={helpOpen} onOpenChange={setHelpOpen}><PopoverTrigger asChild><Button variant="ghost" size="sm" className="h-8 px-2" aria-label="Keyboard shortcuts (?)"><Keyboard className="size-4" /></Button></PopoverTrigger><PopoverContent align="end" className="w-60 p-3 text-xs"><p className="mb-2 font-semibold">Keyboard shortcuts</p><dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">{[["/", "Search tasks"], ["C", "Find a category"], ["1 / 2 / 3", "All / Open / Done"], ["W", "Jump to Waiting on you"], ["N", "New task"], ["Esc", "Clear filters"], ["?", "Show this list"]].map(([k, d]) => <Fragment key={k}><dt><kbd className="rounded border border-border bg-secondary px-1.5 font-mono text-[10px]">{k}</kbd></dt><dd className="text-muted-foreground">{d}</dd></Fragment>)}</dl></PopoverContent></Popover>
     </section>
     <TaskSelectionBar tasks={filtered} />
-    {error ? <p role="alert" className="text-sm text-destructive">Tasks couldn’t load. Please refresh.</p> : <main className="cc-board">{columns.map(col => <section key={col.key} id={col.key === "waiting" ? "waiting-column" : undefined} aria-label={col.name} className={cn("min-w-0 space-y-2 rounded-lg border p-2", col.key === "waiting" ? "border-warning/40 bg-warning-soft" : "border-transparent bg-muted")}><header className="flex min-h-7 flex-wrap items-center gap-2 px-1"><span className={cn("size-2 shrink-0 rounded-full", col.dot)} /><h2 className="text-[13px] font-semibold">{col.name}</h2><span className="font-mono text-[11px] text-muted-foreground">{col.rows.length}</span><span className="ml-auto text-[10px] text-muted-foreground">{col.hint}</span></header>{isLoading ? <div className="h-32 animate-pulse rounded bg-card" /> : col.rows.length ? col.rows.map(t => <BoardCard key={t.id} task={t} />) : <p className="rounded-lg border border-dashed border-border px-2 py-6 text-center text-xs text-muted-foreground">{hasFilters ? "Nothing matches these filters" : "No tasks here"}</p>}</section>)}</main>}
+    {error ? <p role="alert" className="text-sm text-destructive">Tasks couldn’t load. Please refresh.</p> : <main className="cc-board">{columns.map(col => <section key={col.key} id={col.key === "waiting" ? "waiting-column" : undefined} aria-label={col.name} onDragOver={e => { if (e.dataTransfer.types.includes("text/task-id")) { e.preventDefault(); setDragOver(col.key); } }} onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(null); }} onDrop={e => { e.preventDefault(); setDragOver(null); const id = e.dataTransfer.getData("text/task-id"); const t = tasks.find(x => x.id === id); if (t && !col.rows.some(r => r.id === id) && t.status !== col.status) void change([id], col.status); }} className={cn("min-h-40 min-w-0 space-y-2 rounded-lg border p-2 transition-colors", col.key === "waiting" ? "border-warning/40 bg-warning-soft" : "border-transparent bg-muted", dragOver === col.key && "border-primary bg-primary-soft/30 ring-1 ring-primary")}><header className="flex min-h-7 flex-wrap items-center gap-2 px-1"><span className={cn("size-2 shrink-0 rounded-full", col.dot)} /><h2 className="text-[13px] font-semibold">{col.name}</h2><span className="font-mono text-[11px] text-muted-foreground">{col.rows.length}</span><span className="ml-auto text-[10px] text-muted-foreground">{col.hint}</span></header>{isLoading ? <div className="h-32 animate-pulse rounded bg-card" /> : col.rows.length ? col.rows.map(t => <BoardCard key={t.id} task={t} />) : <p className="rounded-lg border border-dashed border-border px-2 py-6 text-center text-xs text-muted-foreground">{hasFilters ? "Nothing matches these filters" : "Drop tasks here"}</p>}</section>)}</main>}
   </div>;
 }
