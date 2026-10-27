@@ -24,9 +24,10 @@ export const Route = createFileRoute("/_authenticated/today")({
 });
 
 function BoardCard({ task }: { task: Task }) {
+  const { change } = useTaskActions();
   const waiting = task.status === "needs_review", done = task.status === "completed";
   return <article draggable onDragStart={e => { e.dataTransfer.setData("text/task-id", task.id); e.dataTransfer.effectAllowed = "move"; }} className={cn("cc-board-card cursor-grab active:cursor-grabbing min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
-    <Link to="/tasks/$id" params={{ id: task.id }} className={cn("group flex items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
+    <Link draggable={false} to="/tasks/$id" params={{ id: task.id }} className={cn("group flex items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
       <h3 className="min-w-0 flex-1 break-words [overflow-wrap:anywhere]">{task.title}</h3><ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground group-hover:text-primary" />
     </Link>
     <div className="mt-1.5 flex flex-wrap items-center gap-1">
@@ -38,6 +39,10 @@ function BoardCard({ task }: { task: Task }) {
     <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-1 text-[10px] text-muted-foreground"><span className="break-words">{task.category}</span><span className={cn("font-mono", task.priority === "urgent" && "text-destructive")}>{task.priority === "urgent" ? "Urgent · " : ""}{done ? task.completed_at ? `Done ${relativeTime(task.completed_at)}` : "Completion date unknown" : task.last_activity_at ? relativeTime(task.last_activity_at) : "Activity date unknown"}</span></div>
     <TaskTimestamps task={task} />
     <TaskCardActions task={task} compact />
+    <select aria-label={`Move ${task.title}`} value="" onChange={e => { if (e.target.value) void change([task.id], e.target.value as TaskStatus); }} className="mt-1.5 h-7 w-full rounded border border-border bg-card px-1.5 text-[11px] text-muted-foreground md:hidden">
+      <option value="" disabled>Move to…</option>
+      {([["queued", "Backlog"], ["needs_review", "Needs you"], ["in_progress", "Being done"], ["completed", "Done"]] as const).filter(([v]) => v !== task.status).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+    </select>
     {task.status === "in_progress" && <div className="mt-1.5 flex items-center gap-2"><progress aria-label={`${task.title} progress`} max={100} value={task.progress} className="h-0.5 min-w-0 flex-1 accent-info" /><span className="cc-label text-info">{task.progress}%</span></div>}
   </article>;
 }
