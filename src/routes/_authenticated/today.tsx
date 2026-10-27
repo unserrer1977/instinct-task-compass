@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Search, Plus, ArrowUpRight, ArrowRight, Network, X, UserRound } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Search, Plus, Check, ChevronDown, Keyboard, ArrowUpRight, ArrowRight, Network, X, UserRound } from "lucide-react";
 import { useTasks } from "@/hooks/use-tasks";
 import { TaskTimestamps } from "@/components/task-bits";
 import { TaskSelectionBar, TaskCardActions } from "@/components/task-actions";
@@ -56,6 +59,29 @@ function Today() {
     ...PLATFORMS.filter(p => tasks.some(t => taskAgents(t).includes(p.key))).map(p => ({ key: p.key, label: p.label, logo: p.logo || `https://cdn.simpleicons.org/${p.slug}/${p.color}`, initial: p.label.slice(0, 2) })),
     ...(tasks.some(t => t.source !== "instinct") ? [{ key: "you", label: "You", logo: "", initial: "You" }] : []),
   ];
+  const [catOpen, setCatOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement;
+      if (el.closest("input, textarea, select, [contenteditable=true], [role=dialog]")) { if (e.key === "Escape" && el === searchRef.current) searchRef.current?.blur(); return; }
+      const k = e.key;
+      if (k === "/") { e.preventDefault(); searchRef.current?.focus(); }
+      else if (k === "c") { e.preventDefault(); setCatOpen(true); }
+      else if (k === "n") { e.preventDefault(); navigate({ to: "/delegate" }); }
+      else if (k === "1") setView("all");
+      else if (k === "2") setView("open");
+      else if (k === "3") setView("done");
+      else if (k === "w") document.getElementById("waiting-column")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      else if (k === "Escape") { setQuery(""); setAgents([]); setCategories([]); setView("all"); }
+      else if (k === "?") { e.preventDefault(); setHelpOpen(o => !o); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navigate]);
   const toggle = (old: string[], key: string) => old.includes(key) ? old.filter(v => v !== key) : [...old, key];
   const hasFilters = query.trim() || agents.length || categories.length || view !== "all";
   const clear = () => { setQuery(""); setAgents([]); setCategories([]); setView("all"); };
@@ -76,13 +102,15 @@ function Today() {
       <Button variant="outline" aria-pressed={view === "open" && !agents.length && !categories.length} onClick={() => { clear(); setView("open"); document.getElementById("waiting-column")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="h-auto min-h-14 justify-start gap-3 border-warning/40 bg-warning-soft px-3 text-left lg:flex-[1.3]">
         <span className="font-mono text-2xl font-medium text-warning">{waiting.length}</span><span className="flex flex-col gap-0.5"><span className="text-[13px] text-warning">Need you</span><span className="font-mono text-[10px] text-muted-foreground">{waiting.length ? knownWaits[0] ? `oldest ${relativeTime(knownWaits[0])}` : "Wait date unknown" : "All clear"}</span></span>
       </Button>
-      {tiles.map(a => { const mine = tasks.filter(t => taskAgents(t).includes(a.key)), active = mine.filter(t => t.status === "in_progress").length, needs = mine.filter(t => t.status === "needs_review").length; return <Button key={a.key} variant="outline" aria-pressed={agents.includes(a.key)} onClick={() => setAgents(toggle(agents, a.key))} className={cn("h-auto min-h-14 min-w-0 flex-col items-start justify-center gap-1 bg-card px-3 text-left lg:min-w-32 lg:flex-1", agents.includes(a.key) && "border-primary bg-primary-soft/30")}><span className="flex items-center gap-2 text-[13px]">{a.key === "instinct" ? <InstinctLogo className="size-5" /> : a.logo ? <img src={a.logo} alt="" className="size-5 object-contain" onError={e => { e.currentTarget.style.display = "none"; }} /> : <UserRound className="size-4 text-muted-foreground" />}{a.label}</span><span className="font-mono text-[10px] text-muted-foreground">{active ? `${active} running` : "Idle"}{needs ? ` · ${needs} for you` : ""}</span></Button>; })}
+      {tiles.map(a => { const mine = tasks.filter(t => taskAgents(t).includes(a.key)), active = mine.filter(t => t.status === "in_progress").length, needs = mine.filter(t => t.status === "needs_review").length; if (!active && !needs && !agents.includes(a.key)) return null; return <Button key={a.key} variant="outline" aria-pressed={agents.includes(a.key)} onClick={() => setAgents(toggle(agents, a.key))} className={cn("h-auto min-h-14 min-w-0 flex-col items-start justify-center gap-1 bg-card px-3 text-left lg:min-w-32 lg:flex-1", agents.includes(a.key) && "border-primary bg-primary-soft/30")}><span className="flex items-center gap-2 text-[13px]">{a.key === "instinct" ? <InstinctLogo className="size-5" /> : a.logo ? <img src={a.logo} alt="" className="size-5 object-contain" onError={e => { e.currentTarget.style.display = "none"; }} /> : <UserRound className="size-4 text-muted-foreground" />}{a.label}</span><span className="font-mono text-[10px] text-muted-foreground">{active ? `${active} running` : "Idle"}{needs ? ` · ${needs} for you` : ""}</span></Button>; })}
     </section>
     <section aria-label="Task filters" className="flex flex-wrap items-center gap-2">
       <div role="group" aria-label="Task view" className="flex gap-0.5 rounded-lg border border-border bg-card p-0.5">{[["all", "All", tasks.filter(t => t.status !== "cancelled").length], ["open", "Open", tasks.filter(isOpen).length], ["done", "Done", tasks.filter(t => t.status === "completed").length]].map(([key, label, count]) => <Button key={key} variant="ghost" size="sm" aria-pressed={view === key} onClick={() => setView(String(key))} className={cn("h-7 gap-1.5 px-2 text-xs", view === key ? "bg-secondary text-foreground" : "text-muted-foreground")}>{label}<span className="font-mono text-[10px]">{count}</span></Button>)}</div>
-      <div role="group" aria-label="Categories" className="flex min-w-0 flex-1 flex-wrap gap-1.5">{categoryNames.map(c => <Button key={c} size="sm" variant="outline" aria-pressed={categories.includes(c)} onClick={() => setCategories(toggle(categories, c))} className={cn("h-auto min-h-7 rounded-full px-2.5 py-1 text-[11px] whitespace-normal", categories.includes(c) ? "border-foreground bg-foreground text-background hover:bg-foreground/90" : "text-muted-foreground")}>{c}</Button>)}</div>
+      <Popover open={catOpen} onOpenChange={setCatOpen}><PopoverTrigger asChild><Button variant="outline" size="sm" aria-label="Filter by category (shortcut C)" className={cn("h-8 gap-1.5 text-xs", categories.length && "border-foreground")}>{categories.length ? categories.length === 1 ? categories[0] : `${categories.length} categories` : "All categories"}<kbd className="rounded border border-border px-1 font-mono text-[9px] text-muted-foreground">C</kbd><ChevronDown className="size-3" /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 p-0"><Command><CommandInput placeholder="Find category…" /><CommandList><CommandEmpty>No category found</CommandEmpty><CommandGroup>{categories.length > 0 && <CommandItem onSelect={() => setCategories([])}>Show all categories</CommandItem>}{categoryNames.map(c => <CommandItem key={c} value={c} onSelect={() => setCategories(toggle(categories, c))}><Check className={cn("size-3.5", categories.includes(c) ? "opacity-100" : "opacity-0")} /><span className="flex-1">{c}</span><span className="font-mono text-[10px] text-muted-foreground">{tasks.filter(t => t.category === c && t.status !== "cancelled").length}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover>
+      <div className="flex-1" />
       {Boolean(hasFilters) && <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clear}><X className="size-3" />Clear filters</Button>}
-      <label className="relative min-w-0 grow sm:max-w-56"><Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" /><input type="search" aria-label="Search tasks" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tasks" className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-2 text-xs outline-none focus:ring-1 focus:ring-ring" /></label>
+      <label className="relative min-w-0 grow sm:max-w-56"><Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" /><input ref={searchRef} type="search" aria-label="Search tasks (shortcut /)" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tasks  /" className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-2 text-xs outline-none focus:ring-1 focus:ring-ring" /></label>
+      <Popover open={helpOpen} onOpenChange={setHelpOpen}><PopoverTrigger asChild><Button variant="ghost" size="sm" className="h-8 px-2" aria-label="Keyboard shortcuts (?)"><Keyboard className="size-4" /></Button></PopoverTrigger><PopoverContent align="end" className="w-60 p-3 text-xs"><p className="mb-2 font-semibold">Keyboard shortcuts</p><dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">{[["/", "Search tasks"], ["C", "Find a category"], ["1 / 2 / 3", "All / Open / Done"], ["W", "Jump to Waiting on you"], ["N", "New task"], ["Esc", "Clear filters"], ["?", "Show this list"]].map(([k, d]) => <><dt key={k}><kbd className="rounded border border-border bg-secondary px-1.5 font-mono text-[10px]">{k}</kbd></dt><dd key={d} className="text-muted-foreground">{d}</dd></>)}</dl></PopoverContent></Popover>
     </section>
     <TaskSelectionBar tasks={filtered} />
     {error ? <p role="alert" className="text-sm text-destructive">Tasks couldn’t load. Please refresh.</p> : <main className="cc-board">{columns.map(col => <section key={col.key} id={col.key === "waiting" ? "waiting-column" : undefined} aria-label={col.name} className={cn("min-w-0 space-y-2 rounded-lg border p-2", col.key === "waiting" ? "border-warning/40 bg-warning-soft" : "border-transparent bg-muted")}><header className="flex min-h-7 flex-wrap items-center gap-2 px-1"><span className={cn("size-2 shrink-0 rounded-full", col.dot)} /><h2 className="text-[13px] font-semibold">{col.name}</h2><span className="font-mono text-[11px] text-muted-foreground">{col.rows.length}</span><span className="ml-auto text-[10px] text-muted-foreground">{col.hint}</span></header>{isLoading ? <div className="h-32 animate-pulse rounded bg-card" /> : col.rows.length ? col.rows.map(t => <BoardCard key={t.id} task={t} />) : <p className="rounded-lg border border-dashed border-border px-2 py-6 text-center text-xs text-muted-foreground">{hasFilters ? "Nothing matches these filters" : "No tasks here"}</p>}</section>)}</main>}
