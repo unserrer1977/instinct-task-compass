@@ -4,7 +4,7 @@ import { Check, X, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTasks, DemoMode } from "@/hooks/use-tasks";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TASK_STATUSES, statusMeta, type Task, type TaskStatus } from "@/lib/tasks";
@@ -26,6 +26,8 @@ export function useTaskActions() {
 
 export function TaskActionsProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
+  const demo = useContext(DemoMode);
+  const key = demo ? ["tasks", "demo"] : ["tasks"];
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const lock = useRef(false);
@@ -34,23 +36,25 @@ export function TaskActionsProvider({ children }: { children: ReactNode }) {
     if (lock.current || !ids.length) return;
     lock.current = true;
     setBusy(true);
-    await qc.cancelQueries({ queryKey: ["tasks"] });
-    const previous = qc.getQueryData<Task[]>(["tasks"]) ?? [];
+    await qc.cancelQueries({ queryKey: key });
+    const previous = qc.getQueryData<Task[]>(key) ?? [];
     const now = new Date().toISOString();
-    qc.setQueryData<Task[]>(["tasks"], previous.map((task) => {
+    qc.setQueryData<Task[]>(key, previous.map((task) => {
       if (!ids.includes(task.id)) return task;
       const old = restore?.find((row) => row.id === task.id);
       return old ? { ...task, status: old.status, progress: old.progress, completed_at: old.completed_at, updated_at: now } : status ? { ...task, ...statusPatch(task, status, now) } : task;
     }));
     try {
-      const { data, error } = await supabase.rpc("change_task_status", {
+      const { data, error } = demo
+        ? { data: { before: previous.filter((t) => ids.includes(t.id)), after: (qc.getQueryData<Task[]>(key) ?? []).filter((t) => ids.includes(t.id)) }, error: null }
+        : await supabase.rpc("change_task_status", {
         p_ids: ids,
         ...(status ? { p_status: status } : {}),
         ...(restore ? { p_restore: restore as Json } : {}),
       });
       if (error) throw error;
       const result = data as unknown as { before: Task[]; after: Task[] };
-      qc.setQueryData<Task[]>(["tasks"], (rows = []) => rows.map((row) => result.after.find((task) => task.id === row.id) ?? row));
+      qc.setQueryData<Task[]>(key, (rows = []) => rows.map((row) => result.after.find((task) => task.id === row.id) ?? row));
       setSelected((old) => toggleTaskSelection(old, ids, false));
       if (restore) toast.success(`Restored ${ids.length} task${ids.length === 1 ? "" : "s"}`);
       else toast.success(`${ids.length} task${ids.length === 1 ? "" : "s"} marked ${status === "completed" ? "Done" : statusMeta(status ?? "queued").label}`, {
@@ -58,13 +62,15 @@ export function TaskActionsProvider({ children }: { children: ReactNode }) {
         action: { label: "Undo", onClick: () => { void run(ids, undefined, undoRecords(result.before, result.after)); } },
       });
     } catch (error) {
-      qc.setQueryData<Task[]>(["tasks"], (rows = []) => rows.map((row) => ids.includes(row.id) ? previous.find((task) => task.id === row.id) ?? row : row));
+      qc.setQueryData<Task[]>(key, (rows = []) => rows.map((row) => ids.includes(row.id) ? previous.find((task) => task.id === row.id) ?? row : row));
       toast.error(error instanceof Error ? error.message : (error as { message?: string })?.message ?? "Couldn't update tasks. Please try again.");
     } finally {
       lock.current = false;
       setBusy(false);
-      void qc.invalidateQueries({ queryKey: ["tasks"] });
-      void qc.invalidateQueries({ queryKey: ["task_updates"] });
+      if (!demo) {
+        void qc.invalidateQueries({ queryKey: ["tasks"] });
+        void qc.invalidateQueries({ queryKey: ["task_updates"] });
+      }
     }
   }
 
