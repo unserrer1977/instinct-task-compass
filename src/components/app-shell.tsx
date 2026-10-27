@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const initial = (user?.user_metadata?.["full_name"] ?? user?.email ?? "?").charAt(0).toUpperCase();
   const avatar = user?.user_metadata?.["avatar_url"] as string | undefined;
 
-  if (path === "/today") return (
+  if (path === "/today" || /^\/tasks\/[^/]+\/?$/.test(path)) return (
     <div className="control-centre min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-[1680px] px-3 pb-20 pt-3 md:px-[18px]"><TaskActionsProvider>{children}</TaskActionsProvider></main>
       <nav aria-label="Main navigation" className="cc-navigation fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-md">

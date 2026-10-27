@@ -9,6 +9,8 @@ import { EventTime, ProgressBar, SourceBadge, StatusChip } from "@/components/ta
 import { categoryIcon, formatDateTime, formatTaskTimestamp, isOpen, statusMeta, TASK_STATUSES, wasImportedLater, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { TaskAttachments } from "@/components/task-attachments";
+import { PlatformBadges } from "@/components/platform-badges";
+import { TaskCardActions } from "@/components/task-actions";
 
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
   head: () => ({
@@ -74,140 +76,140 @@ function TaskInspector() {
   }
 
   const m = statusMeta(task.status);
+  const panel = "rounded-lg border border-border bg-card p-3";
 
   return (
-    <div className="flex flex-col gap-4 py-3">
-      <Link to="/tasks" className="inline-flex items-center gap-1 text-[13px] font-medium text-muted-foreground">
-        <Icon name="arrow_back" className="text-[18px]" /> Back to Tasks
-      </Link>
+    <div className="flex flex-col gap-3 py-1">
+      <div className="flex items-center justify-between gap-2">
+        <Link to="/today" className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground hover:text-primary">
+          <Icon name="arrow_back" className="text-[16px]" /> Back to Control Centre
+        </Link>
+        <span className="cc-label text-muted-foreground">Task inspector</span>
+      </div>
 
-      <div className="card-surface relative overflow-hidden p-4">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary-soft/40 blur-2xl" />
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusChip status={task.status} />
-            {task.status === "in_progress" && <span className="font-mono text-[12px] text-muted-foreground">{task.progress}% complete</span>}
-          </div>
-          <div className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground">
-            <Icon name={categoryIcon(task.category)} className="text-[15px]" /> {task.category}
-            <span className="text-border">•</span>
-            <SourceBadge source={task.source} />
-          </div>
-          <h1 className="mt-2 text-[22px] font-semibold leading-7 tracking-tight">{task.title}</h1>
-          {task.description && <p className="mt-2 whitespace-pre-wrap text-[14px] text-muted-foreground">{task.description}</p>}
-          {isOpen(task) && (
-            <div className="mt-4 flex flex-col gap-1.5">
-              <div className="flex justify-between text-[12px]">
-                <span className="text-muted-foreground">{task.current_step ?? m.label}</span>
-                <span className="font-mono text-primary">{task.progress}%</span>
-              </div>
-              <ProgressBar value={task.progress} />
-            </div>
+      <header className={panel}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <StatusChip status={task.status} />
+          <SourceBadge source={task.source} />
+          <PlatformBadges task={task} />
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+            <Icon name={categoryIcon(task.category)} className="text-[14px]" /> {task.category}
+          </span>
+          {(task.priority === "high" || task.priority === "urgent") && (
+            <span className="rounded-full bg-destructive-soft/70 px-1.5 py-0.5 text-[10px] font-semibold capitalize text-on-destructive-soft">{task.priority}</span>
           )}
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <Meta icon="schedule" label="Created" value={task.initiated_at ? formatTaskTimestamp(task.initiated_at) : "Original date unknown"} />
-        <Meta icon="play_circle" label="Work started" value={task.started_at ? formatTaskTimestamp(task.started_at) : "—"} />
-        <Meta icon="update" label="Last activity" value={task.last_activity_at ? formatTaskTimestamp(task.last_activity_at) : "Unknown"} />
-        <Meta icon="event" label="Deadline" value={formatDateTime(task.deadline)} />
-        <Meta icon="task_alt" label="Completed" value={formatTaskTimestamp(task.completed_at)} />
-        <Meta icon="flag" label="Priority" value={task.priority} />
-        <Meta icon="verified_user" label="Autonomy" value={task.autonomy.replace(/_/g, " ")} />
-        {wasImportedLater(task) && <Meta icon="cloud_upload" label="Imported" value={formatTaskTimestamp(task.created_at)} />}
-      </div>
-
-      {task.result && (
-        <section className="card-surface p-4">
-          <h2 className="flex items-center gap-1.5 text-[14px] font-semibold"><Icon name="recommend" className="text-[18px] text-success" /> Result</h2>
-          <p className="mt-2 whitespace-pre-wrap text-[14px]">{task.result}</p>
-        </section>
-      )}
-
-      {task.notes && (
-        <section className="card-surface p-4">
-          <h2 className="flex items-center gap-1.5 text-[14px] font-semibold"><Icon name="sticky_note_2" className="text-[18px] text-primary" /> Notes</h2>
-          <p className="mt-2 whitespace-pre-wrap text-[14px] text-muted-foreground">{task.notes}</p>
-        </section>
-      )}
-
-      <TaskAttachments taskId={task.id} />
-
-
-      <section className="card-surface p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-1.5 text-[14px] font-semibold"><Icon name="history_edu" className="text-[18px] text-primary" /> Execution Audit Log</h2>
-          <span className="font-mono text-[11px] text-muted-foreground">{updates.length} events logged</span>
-        </div>
-        <ol className="mt-3 flex flex-col">
-          {updates.length === 0 && <li className="text-[13px] text-muted-foreground">No progress updates yet.</li>}
-          {updates.map((u, i) => (
-            <li key={u.id} className="relative flex gap-3 pb-4 last:pb-0">
-              {i < updates.length - 1 && <span className="absolute left-[13px] top-7 bottom-0 w-px bg-border" />}
-              <span className={cn("z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full", u.kind === "completed" ? "bg-success text-primary-foreground" : "bg-primary-soft text-primary")}>
-                <Icon name={KIND_ICON[u.kind] ?? "bolt"} className="text-[15px]" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-semibold text-muted-foreground">{u.source === "instinct" ? "Instinct" : "You"}{u.progress != null ? ` · ${u.progress}%` : ""}</span>
-                  <EventTime u={u} />
-                </div>
-                <p className="mt-0.5 whitespace-pre-wrap text-[13px]">{u.message}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-4 flex gap-2">
-          <input value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addNote()} placeholder="Add a note or instruction for Instinct…" className="h-10 flex-1 rounded-lg bg-surface-low px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
-          <button onClick={addNote} disabled={busy || !note.trim()} className="h-10 rounded-lg bg-surface-high px-3 text-[13px] font-semibold disabled:opacity-50">Add</button>
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        {task.status === "needs_review" && (
-          <button disabled={busy} onClick={() => patch({ status: "in_progress" }, "Approved — continue")} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-primary-foreground shadow-md shadow-primary/25">
-            <Icon name="lock_clock" /> Approve & let Instinct continue
-          </button>
-        )}
+        <h1 className="cc-heading mt-2 text-[20px] leading-tight break-words [overflow-wrap:anywhere] md:text-[24px]">{task.title}</h1>
+        {task.description && <p className="mt-1.5 whitespace-pre-wrap text-[13px] text-muted-foreground">{task.description}</p>}
         {isOpen(task) && (
-          <button disabled={busy} onClick={() => patch({ status: "completed" }, "Marked complete from dashboard")} className="flex h-11 items-center justify-center gap-2 rounded-xl bg-success-soft/50 font-semibold text-on-success-soft">
-            <Icon name="check_circle" /> Mark complete
-          </button>
+          <div className="mt-3 flex flex-col gap-1">
+            <div className="flex justify-between text-[12px]">
+              <span className="text-muted-foreground">{task.current_step ?? m.label}</span>
+              <span className="font-mono text-primary">{task.progress}%</span>
+            </div>
+            <ProgressBar value={task.progress} />
+          </div>
         )}
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex h-11 items-center gap-1 rounded-xl bg-card px-3 shadow-sm">
-            <Icon name="edit_note" className="text-muted-foreground" />
-            <select
-              value={task.status}
-              disabled={busy}
-              onChange={(e) => patch({ status: e.target.value }, `Status changed to ${statusMeta(e.target.value).label}`)}
-              className="h-full flex-1 bg-transparent text-[13px] font-semibold outline-none"
-              aria-label="Change status"
-            >
-              {TASK_STATUSES.map((s) => <option key={s} value={s}>{statusMeta(s).label}</option>)}
-            </select>
-          </label>
-          {isOpen(task) ? (
-            <button disabled={busy} onClick={() => patch({ status: "cancelled" }, "Cancelled from dashboard")} className="flex h-11 items-center justify-center gap-1 rounded-xl bg-card text-[13px] font-semibold text-muted-foreground shadow-sm">
-              <Icon name="cancel" /> Cancel
-            </button>
-          ) : (
-            <button onClick={remove} className="flex h-11 items-center justify-center gap-1 rounded-xl bg-card text-[13px] font-semibold text-destructive shadow-sm">
-              <Icon name="delete" /> Delete
-            </button>
+      </header>
+
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="flex min-w-0 flex-col gap-3">
+          {task.result && (
+            <section className={panel}>
+              <h2 className="cc-label flex items-center gap-1 text-success"><Icon name="recommend" className="text-[15px]" /> Result</h2>
+              <p className="mt-1.5 whitespace-pre-wrap text-[13px]">{task.result}</p>
+            </section>
           )}
+          {task.notes && (
+            <section className={panel}>
+              <h2 className="cc-label flex items-center gap-1 text-primary"><Icon name="sticky_note_2" className="text-[15px]" /> Notes</h2>
+              <p className="mt-1.5 whitespace-pre-wrap text-[13px] text-muted-foreground">{task.notes}</p>
+            </section>
+          )}
+          <TaskAttachments taskId={task.id} />
+          <section className={panel}>
+            <div className="flex items-center justify-between">
+              <h2 className="cc-label flex items-center gap-1 text-primary"><Icon name="history_edu" className="text-[15px]" /> Activity</h2>
+              <span className="font-mono text-[11px] text-muted-foreground">{updates.length} events</span>
+            </div>
+            <ol className="mt-2 flex flex-col divide-y divide-border">
+              {updates.length === 0 && <li className="py-2 text-[13px] text-muted-foreground">No progress updates yet.</li>}
+              {updates.map((u) => (
+                <li key={u.id} className="flex gap-2.5 py-2">
+                  <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full", u.kind === "completed" ? "bg-success-soft/50 text-success" : "bg-primary-soft/60 text-primary")}>
+                    <Icon name={KIND_ICON[u.kind] ?? "bolt"} className="text-[14px]" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-x-2">
+                      <span className="text-[11px] font-semibold text-muted-foreground">{u.source === "instinct" ? "Instinct" : "You"}{u.progress != null ? ` · ${u.progress}%` : ""}</span>
+                      <EventTime u={u} />
+                    </div>
+                    <p className="mt-0.5 whitespace-pre-wrap break-words text-[13px]">{u.message}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-2 flex gap-2">
+              <input value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addNote()} placeholder="Add a note or instruction for Instinct…" className="h-9 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-[13px] outline-none focus:ring-2 focus:ring-ring" />
+              <button onClick={addNote} disabled={busy || !note.trim()} className="h-9 rounded-md bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-50">Add</button>
+            </div>
+          </section>
         </div>
-      </section>
+
+        <aside className="flex flex-col gap-3">
+          <section className={panel}>
+            <h2 className="cc-label mb-2 text-muted-foreground">Actions</h2>
+            <div className="flex flex-col gap-2">
+              {task.status === "needs_review" && (
+                <button disabled={busy} onClick={() => patch({ status: "in_progress" }, "Approved — continue")} className="flex h-9 items-center justify-center gap-1.5 rounded-md bg-warning/20 text-[13px] font-semibold text-warning">
+                  <Icon name="lock_clock" className="text-[16px]" /> Approve & continue
+                </button>
+              )}
+              <TaskCardActions task={task} compact />
+              <select
+                value={task.status}
+                disabled={busy}
+                onChange={(e) => patch({ status: e.target.value }, `Status changed to ${statusMeta(e.target.value).label}`)}
+                className="h-9 rounded-md border border-border bg-background px-2 text-[13px] font-semibold outline-none"
+                aria-label="Change status"
+              >
+                {TASK_STATUSES.map((s) => <option key={s} value={s}>{statusMeta(s).label}</option>)}
+              </select>
+              {isOpen(task) ? (
+                <button disabled={busy} onClick={() => patch({ status: "cancelled" }, "Cancelled from dashboard")} className="flex h-9 items-center justify-center gap-1 rounded-md border border-border text-[12px] font-semibold text-muted-foreground">
+                  <Icon name="cancel" className="text-[16px]" /> Cancel task
+                </button>
+              ) : (
+                <button onClick={remove} className="flex h-9 items-center justify-center gap-1 rounded-md border border-border text-[12px] font-semibold text-destructive">
+                  <Icon name="delete" className="text-[16px]" /> Delete
+                </button>
+              )}
+            </div>
+          </section>
+          <section className={panel}>
+            <h2 className="cc-label mb-1 text-muted-foreground">Dates</h2>
+            <dl className="divide-y divide-border">
+              <Meta label="Created" value={task.initiated_at ? formatTaskTimestamp(task.initiated_at) : "Original date unknown"} />
+              <Meta label="Work started" value={task.started_at ? formatTaskTimestamp(task.started_at) : "—"} />
+              <Meta label="Last activity" value={task.last_activity_at ? formatTaskTimestamp(task.last_activity_at) : "Unknown"} />
+              <Meta label="Deadline" value={formatDateTime(task.deadline)} />
+              <Meta label="Completed" value={formatTaskTimestamp(task.completed_at)} />
+              {wasImportedLater(task) && <Meta label="Imported" value={formatTaskTimestamp(task.created_at)} />}
+              <Meta label="Priority" value={task.priority} />
+              <Meta label="Autonomy" value={task.autonomy.replace(/_/g, " ")} />
+            </dl>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
 
-function Meta({ icon, label, value }: { icon: string; label: string; value: string }) {
+function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-card p-3 shadow-sm">
-      <div className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"><Icon name={icon} className="text-[14px]" />{label}</div>
-      <p className="mt-0.5 text-[13px] font-medium capitalize">{value}</p>
+    <div className="flex items-baseline justify-between gap-3 py-1.5 text-[12px]">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right font-mono capitalize">{value}</dd>
     </div>
   );
 }

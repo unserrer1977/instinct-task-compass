@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- The Control Centre dashboard uses a route-scoped theme and a responsive four-status board with agent/source tiles and category filters; it never infers external platforms or recurring schedules absent from task records.
+- The Control Centre dashboard uses a route-scoped theme (shared by the task detail page via AppShell's path check) and a responsive four-status board with agent/source tiles and category filters; it never infers external platforms or recurring schedules absent from task records.
 - Task Q&A uses an authenticated TanStack streaming route with caller-scoped task reads and a single account-saved UIMessage transcript; topics annotate exchanges and have read-view URLs, never separate communication sessions.
 - New AI text calls use request-local Lovable AI Gateway Responses helpers in src/lib/ai, keeping credentials and prompts server-only and forwarding gateway-issued run IDs.
 - The Instinct MCP server is a hand-rolled stateless JSON-RPC endpoint at `/api/public/mcp` (logic in `src/lib/instinct-mcp.ts`), authenticated by revocable per-user API keys (`inst_…`, only SHA-256 hashes stored in `mcp_credentials`) — the user explicitly asked for generate/copy/revoke keys rather than OAuth.
