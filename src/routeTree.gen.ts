@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedDelegateRouteImport } from './routes/_authenticated/delegate'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
@@ -35,6 +36,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAssistantRoute = AuthenticatedAssistantRouteImport.update({
@@ -92,6 +98,7 @@ const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/delegate': typeof AuthenticatedDelegateRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/demo'
     | '/assistant'
     | '/delegate'
     | '/history'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/demo'
     | '/assistant'
     | '/delegate'
     | '/history'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/demo'
     | '/_authenticated/assistant'
     | '/_authenticated/delegate'
     | '/_authenticated/history'
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DemoRoute: typeof DemoRoute
   ApiAssistantRoute: typeof ApiAssistantRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
 }
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/assistant': {
@@ -312,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DemoRoute: DemoRoute,
   ApiAssistantRoute: ApiAssistantRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
 }
