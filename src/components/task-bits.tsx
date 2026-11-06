@@ -3,6 +3,9 @@ import { Icon } from "@/components/app-shell";
 import { eventTime, categoryIcon, formatDateTime, formatTaskTimestamp, relativeTime, statusMeta, wasImportedLater, type Task, type TaskUpdate } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { TaskCardActions, useTaskActions } from "@/components/task-actions";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function StatusChip({ status, className }: { status: string; className?: string }) {
   const m = statusMeta(status);
@@ -36,10 +39,14 @@ export function ProgressBar({ value, tone = "primary" }: { value: number; tone?:
 }
 
 export function TaskCard({ task }: { task: Task }) {
+  const [expanded, setExpanded] = useState(true);
   const done = task.status === "completed";
   const { selected } = useTaskActions();
   return (
     <article className={cn("card-surface p-4 transition-shadow", selected.has(task.id) && "ring-2 ring-primary")}>
+    <div className="flex justify-end">
+      <Button variant="ghost" size="icon" className="size-7" aria-label={`${expanded ? "Collapse" : "Expand"} ${task.title}`} title={expanded ? "Collapse card" : "Expand card"} aria-expanded={expanded} aria-controls={`task-details-${task.id}`} onClick={() => setExpanded(value => !value)}><ChevronDown className={cn("size-4 transition-transform motion-reduce:transition-none", expanded && "rotate-180")} /></Button>
+    </div>
     <Link
       to="/tasks/$id"
       params={{ id: task.id }}
@@ -60,6 +67,7 @@ export function TaskCard({ task }: { task: Task }) {
         <StatusChip status={task.status} />
       </div>
       <h3 className={cn("mt-2 text-[15px] font-semibold leading-snug tracking-tight break-words [overflow-wrap:anywhere]", done && "text-muted-foreground")}>{task.title}</h3>
+      <div id={`task-details-${task.id}`} hidden={!expanded}>
       {task.description && <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{task.description}</p>}
       {task.status === "in_progress" && (
         <div className="mt-3 flex flex-col gap-1.5">
@@ -82,6 +90,7 @@ export function TaskCard({ task }: { task: Task }) {
         </span>
       </div>
       <TaskTimestamps task={task} />
+      </div>
     </Link>
     <TaskCardActions task={task} />
     </article>
