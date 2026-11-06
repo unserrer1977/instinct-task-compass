@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Icon } from "@/components/app-shell";
 import { CATEGORIES } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/delegate")({
   validateSearch: (s: Record<string, unknown>): { prompt?: string } => (typeof s["prompt"] === "string" ? { prompt: s["prompt"] } : {}),
@@ -13,10 +14,10 @@ export const Route = createFileRoute("/_authenticated/delegate")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "New Delegation — Instinct Hub" },
-      { name: "description", content: "Hand a new objective to Instinct with guardrails and a deadline." },
-      { property: "og:title", content: "New Delegation — Instinct Hub" },
-      { property: "og:description", content: "Hand a new objective to Instinct with guardrails and a deadline." },
+      { title: "New Task — Task Compass" },
+      { name: "description", content: "Create a real task on your Task Compass board with a category, priority and deadline." },
+      { property: "og:title", content: "New Task — Task Compass" },
+      { property: "og:description", content: "Create a real task on your Task Compass board with a category, priority and deadline." },
     ],
   }),
   component: Delegate,
@@ -41,11 +42,14 @@ function Delegate() {
   const [busy, setBusy] = useState(false);
 
   async function submit(asDraft: boolean) {
+    if (busy) return;
     const t = title.trim() || (prompt.trim().split("\n")[0] ?? "").slice(0, 120);
     if (!t) { toast.error("Describe the objective first"); return; }
     setBusy(true);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { setBusy(false); return; }
+    try {
+    const { data: u, error: authError } = await supabase.auth.getUser();
+    if (authError || !u.user) throw new Error("Your session has expired. Sign in again to save your task.");
+    const occurredAt = new Date().toISOString();
     const { data, error } = await supabase
       .from("tasks")
       .insert({
@@ -58,24 +62,33 @@ function Delegate() {
         status: asDraft ? "scheduled" : "queued",
         deadline: deadline ? new Date(deadline).toISOString() : null,
         source: "dashboard",
+        initiated_at: occurredAt,
+        last_activity_at: occurredAt,
       })
       .select("id")
       .single();
-    if (!error && data) {
-      await supabase.from("task_updates").insert({ task_id: data.id, user_id: u.user.id, message: asDraft ? "Saved as draft" : "Delegated from dashboard — waiting for Instinct to pick it up", kind: "created", source: "dashboard" });
+    if (error) throw error;
+    if (!data) throw new Error("Your task could not be saved. Please try again.");
+    const { error: historyError } = await supabase.from("task_updates").insert({ task_id: data.id, user_id: u.user.id, message: asDraft ? "Saved as draft" : "Delegated from dashboard — waiting for Instinct to pick it up", kind: "created", source: "dashboard", occurred_at: occurredAt });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["tasks"], exact: true }),
+      qc.invalidateQueries({ queryKey: ["task_updates"] }),
+    ]);
+    if (historyError) toast.warning("Task saved, but its creation activity could not be recorded.");
+    else toast.success(asDraft ? "Draft saved to Backlog" : "Task added to Backlog");
+    await navigate({ to: "/today" });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save your task. Please try again.");
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["tasks"] });
-    toast.success(asDraft ? "Draft saved" : "Task delegated to Instinct");
-    navigate({ to: "/tasks/$id", params: { id: data.id } });
   }
 
   return (
     <div className="flex flex-col gap-4 py-3">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">New Objective</h1>
+          <h1 className="text-[22px] font-semibold">New task</h1>
           <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-success" /> Instinct picks this up on its next sync</p>
         </div>
         <Link to="/today" className="text-[13px] font-medium text-muted-foreground">Cancel</Link>
@@ -146,10 +159,10 @@ function Delegate() {
       </div>
 
       <div className="grid grid-cols-[1fr_2fr] gap-2">
-        <button disabled={busy} onClick={() => submit(true)} className="h-12 rounded-xl bg-card text-[13px] font-semibold shadow-sm">Save as Draft</button>
-        <button disabled={busy} onClick={() => submit(false)} className="flex h-12 items-center justify-center gap-1.5 rounded-xl bg-primary font-semibold text-primary-foreground shadow-md shadow-primary/25 disabled:opacity-60">
-          <Icon name="bolt" fill /> Initiate Task Stream
-        </button>
+        <Button variant="outline" disabled={busy} onClick={() => void submit(true)} className="h-12 text-[13px]">Save as Draft</Button>
+        <Button disabled={busy} onClick={() => void submit(false)} className="h-12">
+          <Icon name="bolt" fill /> {busy ? "Saving…" : "Create task"}
+        </Button>
       </div>
     </div>
   );
