@@ -17,19 +17,25 @@ import { PlatformBadges, InstinctLogo, detectPlatforms, PLATFORMS } from "@/comp
 
 function BoardCard({ task }: { task: Task }) {
   const { change } = useTaskActions();
+  const [expanded, setExpanded] = useState(true);
   const waiting = task.status === "needs_review", done = task.status === "completed";
   return <article draggable onDragStart={e => { e.dataTransfer.setData("text/task-id", task.id); e.dataTransfer.effectAllowed = "move"; }} className={cn("cc-board-card cursor-grab active:cursor-grabbing min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
-    <Link draggable={false} to="/tasks/$id" params={{ id: task.id }} className={cn("group flex items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
+    <div className="flex items-start gap-1">
+    <Link draggable={false} to="/tasks/$id" params={{ id: task.id }} className={cn("group flex min-w-0 flex-1 items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
       <h3 className="min-w-0 flex-1 break-words [overflow-wrap:anywhere]">{task.title}</h3><ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground group-hover:text-primary" />
     </Link>
+    <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${task.title}`} title={expanded ? "Collapse card" : "Expand card"} aria-expanded={expanded} aria-controls={`board-details-${task.id}`} onClick={() => setExpanded(value => !value)}><ChevronDown className={cn("size-4 transition-transform motion-reduce:transition-none", expanded && "rotate-180")} /></Button>
+    </div>
     <div className="mt-1.5 flex flex-wrap items-center gap-1">
       <span className={cn("cc-label inline-flex items-center gap-1 rounded border px-1.5 py-0.5", task.source === "instinct" ? "border-primary/30 bg-primary-soft/40 text-primary" : "border-border bg-secondary text-muted-foreground")}>
         {task.source === "instinct" ? <InstinctLogo /> : <UserRound className="size-3" />}{task.source === "instinct" ? "Instinct" : "You"}
       </span><PlatformBadges task={task} />
     </div>
+    <div id={`board-details-${task.id}`} hidden={!expanded}>
     {waiting && task.current_step && <p className="mt-1.5 flex items-start gap-1.5 rounded bg-warning-soft px-1.5 py-1 text-xs leading-snug text-warning"><ArrowRight className="mt-0.5 size-3 shrink-0" /><span className="break-words">{task.current_step}</span></p>}
     <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-1 text-[10px] text-muted-foreground"><span className="break-words">{task.category}</span><span className={cn("font-mono", task.priority === "urgent" && "text-destructive")}>{task.priority === "urgent" ? "Urgent · " : ""}{done ? task.completed_at ? `Done ${relativeTime(task.completed_at)}` : "Completion date unknown" : task.last_activity_at ? relativeTime(task.last_activity_at) : "Activity date unknown"}</span></div>
     <TaskTimestamps task={task} />
+    </div>
     <TaskCardActions task={task} compact />
     <select aria-label={`Move ${task.title}`} value="" onChange={e => { if (e.target.value) void change([task.id], e.target.value as TaskStatus); }} className="mt-1.5 h-7 w-full rounded border border-border bg-card px-1.5 text-[11px] text-muted-foreground md:hidden">
       <option value="" disabled>Move to…</option>
