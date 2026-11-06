@@ -1,5 +1,12 @@
 import type { Task, TaskStatus } from "@/lib/tasks";
 
+export function matchesTaskView(status: Task["status"], view: string, showDone = false) {
+  if (status === "cancelled") return false;
+  if (view === "done") return status === "completed";
+  if (status === "completed") return view === "all" && showDone;
+  return true;
+}
+
 export function statusPatch(task: Task, status: TaskStatus, now: string): Partial<Task> {
   return {
     status,

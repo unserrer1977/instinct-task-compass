@@ -9,6 +9,8 @@ import { TaskTimestamps } from "@/components/task-bits";
 import { TaskSelectionBar, TaskCardActions, useTaskActions } from "@/components/task-actions";
 import type { TaskStatus } from "@/lib/tasks";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { matchesTaskView } from "@/lib/task-status";
 import { isOpen, relativeTime, type Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import { PlatformBadges, InstinctLogo, detectPlatforms, PLATFORMS } from "@/components/platform-badges";
@@ -43,6 +45,7 @@ export function Today() {
   const [agents, setAgents] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [view, setView] = useState("all");
+  const [showDone, setShowDone] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => { setNow(new Date()); const timer = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(timer); }, []);
   const running = tasks.filter(t => t.status === "in_progress");
@@ -81,7 +84,7 @@ export function Today() {
   const toggle = (old: string[], key: string) => old.includes(key) ? old.filter(v => v !== key) : [...old, key];
   const hasFilters = query.trim() || agents.length || categories.length || view !== "all";
   const clear = () => { setQuery(""); setAgents([]); setCategories([]); setView("all"); };
-  const filtered = tasks.filter(t => t.status !== "cancelled" && (view === "all" || (view === "done" ? t.status === "completed" : isOpen(t))) && (!agents.length || taskAgents(t).some(a => agents.includes(a))) && (!categories.length || categories.includes(t.category)) && [t.title, t.description, t.notes, t.current_step, t.category, ...taskAgents(t)].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const filtered = tasks.filter(t => matchesTaskView(t.status, view, showDone) && (!agents.length || taskAgents(t).some(a => agents.includes(a))) && (!categories.length || categories.includes(t.category)) && [t.title, t.description, t.notes, t.current_step, t.category, ...taskAgents(t)].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
   const { change } = useTaskActions();
   const [dragOver, setDragOver] = useState<string | null>(null);
   const columns = [
@@ -106,6 +109,7 @@ export function Today() {
       <div role="group" aria-label="Task view" className="flex gap-0.5 rounded-lg border border-border bg-card p-0.5">{[["all", "All", tasks.filter(t => t.status !== "cancelled").length], ["open", "Open", tasks.filter(isOpen).length], ["done", "Done", tasks.filter(t => t.status === "completed").length]].map(([key, label, count]) => <Button key={key} variant="ghost" size="sm" aria-pressed={view === key} onClick={() => setView(String(key))} className={cn("h-7 gap-1.5 px-2 text-xs", view === key ? "bg-secondary text-foreground" : "text-muted-foreground")}>{label}<span className="font-mono text-[10px]">{count}</span></Button>)}</div>
       <Popover open={catOpen} onOpenChange={setCatOpen}><PopoverTrigger asChild><Button variant="outline" size="sm" aria-label="Filter by category (shortcut C)" className={cn("h-8 gap-1.5 text-xs", categories.length && "border-foreground")}>{categories.length ? categories.length === 1 ? categories[0] : `${categories.length} categories` : "All categories"}<kbd className="rounded border border-border px-1 font-mono text-[9px] text-muted-foreground">C</kbd><ChevronDown className="size-3" /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 p-0"><Command><CommandInput placeholder="Find category…" /><CommandList><CommandEmpty>No category found</CommandEmpty><CommandGroup>{categories.length > 0 && <CommandItem onSelect={() => setCategories([])}>Show all categories</CommandItem>}{categoryNames.map(c => <CommandItem key={c} value={c} onSelect={() => setCategories(toggle(categories, c))}><Check className={cn("size-3.5", categories.includes(c) ? "opacity-100" : "opacity-0")} /><span className="flex-1">{c}</span><span className="font-mono text-[10px] text-muted-foreground">{tasks.filter(t => t.category === c && t.status !== "cancelled").length}</span></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover>
       <div className="flex-1" />
+      <label className="flex h-8 items-center gap-2 text-xs text-muted-foreground"><Switch aria-label="Show done tasks" checked={view === "done" || (view === "all" && showDone)} onCheckedChange={checked => { setShowDone(checked); if (view !== "all") setView("all"); }} />Show done</label>
       {Boolean(hasFilters) && <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clear}><X className="size-3" />Clear filters</Button>}
       <label className="relative min-w-0 grow sm:max-w-56"><Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" /><input ref={searchRef} type="search" aria-label="Search tasks (shortcut /)" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tasks  /" className="h-8 w-full rounded-lg border border-border bg-card pl-8 pr-2 text-xs outline-none focus:ring-1 focus:ring-ring" /></label>
       <Popover open={helpOpen} onOpenChange={setHelpOpen}><PopoverTrigger asChild><Button variant="ghost" size="sm" className="h-8 px-2" aria-label="Keyboard shortcuts (?)"><Keyboard className="size-4" /></Button></PopoverTrigger><PopoverContent align="end" className="w-60 p-3 text-xs"><p className="mb-2 font-semibold">Keyboard shortcuts</p><dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">{[["/", "Search tasks"], ["C", "Find a category"], ["1 / 2 / 3", "All / Open / Done"], ["W", "Jump to Waiting on you"], ["N", "New task"], ["Esc", "Clear filters"], ["?", "Show this list"]].map(([k, d]) => <Fragment key={k}><dt><kbd className="rounded border border-border bg-secondary px-1.5 font-mono text-[10px]">{k}</kbd></dt><dd className="text-muted-foreground">{d}</dd></Fragment>)}</dl></PopoverContent></Popover>
