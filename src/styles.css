@@ -202,18 +202,19 @@
   background-image: none;
 }
 .cc-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.cc-board:not(:has(> section[aria-label="Done"])) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .cc-board-card dl { margin-top: 6px; gap: 2px; font-size: 10px; }
 .cc-board-card dl > div { column-gap: 5px; }
 .control-centre .cc-heading { font-family: var(--font-sans); font-weight: 600; }
 .control-centre .cc-label { text-transform: none; }
 .control-centre [aria-label="Agents"] > button { white-space: normal; }
 @media (max-width: 1100px) {
-  .cc-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cc-board, .cc-board:not(:has(> section[aria-label="Done"])) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .control-centre [aria-label="Task filters"] { align-items: start; }
   .control-centre [aria-label="Categories"] { flex-basis: 100%; order: 3; }
 }
 @media (max-width: 600px) {
-  .cc-board { grid-template-columns: minmax(0, 1fr); }
+  .cc-board, .cc-board:not(:has(> section[aria-label="Done"])) { grid-template-columns: minmax(0, 1fr); }
   .control-centre main > div > header > div:first-child { flex-basis: 100%; }
   .control-centre [aria-label="Agents"] { display: flex; overflow-x: auto; padding-bottom: 4px; }
   .control-centre [aria-label="Agents"] > button { flex: 0 0 150px; }
