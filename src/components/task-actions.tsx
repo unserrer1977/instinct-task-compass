@@ -85,9 +85,9 @@ export function TaskCardActions({ task, compact = false }: { task: Task; compact
         <Checkbox aria-label={`Select ${task.title}`} checked={selected.has(task.id)} disabled={busy} onCheckedChange={(checked) => select([task.id], checked === true)} />
         Select
       </label>
-      <Button size="sm" className={compact ? "h-7 px-2 text-xs" : undefined} disabled={busy || task.status === "completed"} onClick={() => { void change([task.id], "completed"); }} aria-label={`Mark ${task.title} Done`}>
+      {task.status !== "completed" && <Button size="sm" className={compact ? "h-7 px-2 text-xs" : undefined} disabled={busy} onClick={() => { void change([task.id], "completed"); }} aria-label={`Mark ${task.title} Done`}>
         {busy ? <LoaderCircle className="animate-spin" /> : <Check />} Done
-      </Button>
+      </Button>}
     </div>
   );
 }

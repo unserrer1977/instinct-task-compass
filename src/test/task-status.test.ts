@@ -1,9 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { statusPatch, toggleTaskSelection, undoRecords } from "@/lib/task-status";
+import { matchesTaskView, statusPatch, toggleTaskSelection, undoRecords } from "@/lib/task-status";
 import type { Task } from "@/lib/tasks";
 
 const task = { id: "one", status: "in_progress", progress: 42, completed_at: null, updated_at: "before" } as Task;
 describe("fast task status actions", () => {
+  it("hides completed tasks by default while keeping unfinished stacks visible", () => {
+    expect(matchesTaskView("completed", "all")).toBe(false);
+    for (const status of ["queued", "scheduled", "needs_review", "in_progress"] as const) expect(matchesTaskView(status, "all")).toBe(true);
+  });
+  it("shows completed tasks only when explicitly enabled or viewing Done", () => {
+    expect(matchesTaskView("completed", "all", true)).toBe(true);
+    expect(matchesTaskView("completed", "done")).toBe(true);
+    expect(matchesTaskView("queued", "done")).toBe(false);
+    expect(matchesTaskView("completed", "open", true)).toBe(false);
+    expect(matchesTaskView("cancelled", "all", true)).toBe(false);
+  });
   it("Done immediately sets completed status, 100% progress and completion time", () => {
     expect(statusPatch(task, "completed", "now")).toEqual({ status: "completed", progress: 100, completed_at: "now", updated_at: "now" });
   });
