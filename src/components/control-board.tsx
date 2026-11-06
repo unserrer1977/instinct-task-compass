@@ -98,7 +98,7 @@ export function Today() {
     { key: "waiting", name: "Needs you", hint: "Your move", status: "needs_review" as TaskStatus, dot: "rotate-45 rounded-sm bg-warning", rows: filtered.filter(t => t.status === "needs_review") },
     { key: "active", name: "Being done", hint: "Agents on it", status: "in_progress" as TaskStatus, dot: "bg-info motion-safe:animate-pulse", rows: filtered.filter(t => t.status === "in_progress") },
     { key: "done", name: "Done", hint: "Completed", status: "completed" as TaskStatus, dot: "bg-success", rows: filtered.filter(t => t.status === "completed") },
-  ];
+  ].filter(column => column.key !== "done" || matchesTaskView("completed", view, showDone));
   return <div className="flex flex-col gap-3">
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2"><Network className="size-5 shrink-0" /><h1 className="text-base font-semibold">Second Brain</h1><span className="text-[13px] text-muted-foreground">Control centre</span></div>
