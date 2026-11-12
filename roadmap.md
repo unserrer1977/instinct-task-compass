@@ -9,3 +9,5 @@
 - [x] Implement the new Second Brain board design with live tasks and existing actions.
 - [x] Verify filters, task navigation, and desktop/mobile layouts.
 - [x] Verify New task saves real tasks and returns to the live board.
+- [x] Add quick replies to every task card, saved in task activity and readable by Instinct.
+- [x] Verify reply persistence, error handling, and desktop/mobile layouts.
