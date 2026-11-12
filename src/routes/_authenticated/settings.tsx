@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,6 +11,7 @@ import { issueMcpCredential, revokeMcpCredentials } from "@/lib/credentials.func
 import { connectionState, type ConnectionState } from "@/lib/mcp-token";
 import { formatDateTime, relativeTime } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -172,6 +173,7 @@ function Settings() {
       </div>
 
       {/* Status */}
+      <Button asChild variant="outline" className="self-start"><Link to="/connections"><Icon name="hub" />Connection status</Link></Button>
       <section className="card-surface relative overflow-hidden p-4">
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary-soft/40 blur-2xl" />
         <div className="relative flex items-start justify-between gap-3">
