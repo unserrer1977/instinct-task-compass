@@ -6,7 +6,7 @@ export const connectionStatusQuery = queryOptions({
   refetchInterval: 30_000,
   queryFn: async () => {
     const [credentials, tasks, updates, attachments] = await Promise.all([
-      supabase.from("mcp_credentials").select("id,name,created_at,last_used_at,revoked_at").order("created_at", { ascending: false }),
+      supabase.from("mcp_credentials").select("id,name,created_at,last_used_at,revoked_at").order("revoked_at", { ascending: true, nullsFirst: true }).order("created_at", { ascending: false }),
       supabase.from("tasks").select("id,title,created_at").eq("source", "instinct").order("created_at", { ascending: false }).limit(10),
       supabase.from("task_updates").select("id,task_id,message,created_at,tasks(title)").eq("source", "instinct").order("created_at", { ascending: false }).limit(10),
       supabase.from("task_attachments").select("id,task_id,file_name,created_at,tasks(title)").eq("source", "instinct").order("created_at", { ascending: false }).limit(10),
