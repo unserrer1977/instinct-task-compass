@@ -11,3 +11,5 @@
 - [x] Verify New task saves real tasks and returns to the live board.
 - [x] Add quick replies to every task card, saved in task activity and readable by Instinct.
 - [x] Verify reply persistence, error handling, and desktop/mobile layouts.
+- [ ] Add a connection status page with real connection activity, last task transfer, and pending Instinct tasks.
+- [ ] Verify connection labels, navigation, and signed-in desktop/mobile display.

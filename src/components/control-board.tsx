@@ -103,6 +103,7 @@ export function Today() {
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2"><Network className="size-5 shrink-0" /><h1 className="text-base font-semibold">Second Brain</h1><span className="text-[13px] text-muted-foreground">Control centre</span></div>
       <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted-foreground"><span className="inline-flex items-center gap-1.5"><span className={cn("size-1.5 rounded-full", error ? "bg-destructive" : "bg-success")} />{error ? "Sync unavailable" : dataUpdatedAt && now ? `Synced ${new Date(dataUpdatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : "Syncing…"}</span><span>{running.length} running · {tasks.filter(isOpen).length} open</span><span>{now?.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</span></div>
+      <Button asChild variant="outline" size="sm" className="h-8"><Link to="/connections"><Network className="size-3.5" />Connections</Link></Button>
       <Button asChild size="sm" className="h-8 bg-foreground text-background hover:bg-foreground/90"><Link to="/delegate"><Plus className="size-3.5" />New task</Link></Button>
     </header>
     <section aria-label="Agents" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
