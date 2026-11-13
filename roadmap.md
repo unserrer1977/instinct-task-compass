@@ -13,3 +13,5 @@
 - [x] Verify reply persistence, error handling, and desktop/mobile layouts.
 - [x] Add a connection status page with real connection activity, last task transfer, and pending Instinct tasks.
 - [x] Verify connection labels, navigation, and signed-in desktop/mobile display.
+- [ ] Send owner-scoped task replies and due/overdue/blocked/completed notifications to Instinct with task references, dates, and requested actions — blocked until a sender email domain is configured.
+- [ ] Verify notification sends and task matching after sender setup.
