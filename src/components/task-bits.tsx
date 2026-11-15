@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Icon } from "@/components/app-shell";
 import { eventTime, categoryIcon, formatDateTime, formatTaskTimestamp, relativeTime, statusMeta, wasImportedLater, type Task, type TaskUpdate } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
@@ -39,11 +39,12 @@ export function ProgressBar({ value, tone = "primary" }: { value: number; tone?:
 }
 
 export function TaskCard({ task }: { task: Task }) {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(true);
   const done = task.status === "completed";
   const { selected } = useTaskActions();
   return (
-    <article className={cn("card-surface p-4 transition-shadow", selected.has(task.id) && "ring-2 ring-primary")}>
+    <article onClick={event => { if (event.target instanceof Element && !event.target.closest("a, button, input, select, textarea, label, [role=dialog], [role=checkbox]") && !window.getSelection()?.toString()) void navigate({ to: "/tasks/$id", params: { id: task.id } }); }} className={cn("card-surface cursor-pointer p-4 transition-shadow", selected.has(task.id) && "ring-2 ring-primary")}>
     <div className="flex justify-end">
       <Button variant="ghost" size="icon" className="size-7" aria-label={`${expanded ? "Collapse" : "Expand"} ${task.title}`} title={expanded ? "Collapse card" : "Expand card"} aria-expanded={expanded} aria-controls={`task-details-${task.id}`} onClick={() => setExpanded(value => !value)}><ChevronDown className={cn("size-4 transition-transform motion-reduce:transition-none", expanded && "rotate-180")} /></Button>
     </div>

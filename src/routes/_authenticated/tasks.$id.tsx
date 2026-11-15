@@ -11,16 +11,18 @@ import { cn } from "@/lib/utils";
 import { TaskAttachments } from "@/components/task-attachments";
 import { PlatformBadges } from "@/components/platform-badges";
 import { TaskCardActions } from "@/components/task-actions";
+import { taskFocus } from "@/lib/task-focus";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/tasks/$id")({
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Task Inspector — Instinct Hub" },
-      { name: "description", content: "Full detail, progress history and results for a delegated task." },
-      { property: "og:title", content: "Task Inspector — Instinct Hub" },
-      { property: "og:description", content: "Full detail, progress history and results for a delegated task." },
+      { title: "Task Details — Task Compass" },
+      { name: "description", content: "Task status, waiting dependencies, next actions, files and activity in Task Compass." },
+      { property: "og:title", content: "Task Details — Task Compass" },
+      { property: "og:description", content: "Task status, waiting dependencies, next actions, files and activity in Task Compass." },
     ],
   }),
   component: TaskInspector,
@@ -76,6 +78,7 @@ function TaskInspector() {
   }
 
   const m = statusMeta(task.status);
+  const focus = taskFocus(task);
   const panel = "rounded-lg border border-border bg-card p-3";
 
   return (
@@ -111,6 +114,27 @@ function TaskInspector() {
           </div>
         )}
       </header>
+
+      <section aria-label="Task status and next action" className="border-y border-border py-4">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(0,1.3fr)]">
+          <div className="min-w-0">
+            <dt className="cc-label text-muted-foreground">Current status</dt>
+            <dd className="mt-1 text-lg font-semibold">{focus.status}</dd>
+            <dt className="cc-label mt-3 text-muted-foreground">Recorded by</dt>
+            <dd className="mt-1 text-sm">{task.source === "instinct" ? "Instinct" : "You"}</dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="cc-label text-muted-foreground">Who's waiting · for what</dt>
+            <dd className={cn("mt-1 text-sm font-semibold", task.status === "needs_review" && "text-warning")}>{focus.waiting}</dd>
+            <dd className="mt-1 whitespace-pre-wrap break-words text-sm text-muted-foreground">{focus.dependency}</dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="cc-label text-muted-foreground">Action needed</dt>
+            <dd className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{focus.action}</dd>
+            <TaskCardActions task={task} compact />
+          </div>
+        </dl>
+      </section>
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex min-w-0 flex-col gap-3">
@@ -151,7 +175,7 @@ function TaskInspector() {
             </ol>
             <div className="mt-2 flex gap-2">
               <input value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addNote()} placeholder="Add a note or instruction for Instinct…" className="h-9 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-[13px] outline-none focus:ring-2 focus:ring-ring" />
-              <button onClick={addNote} disabled={busy || !note.trim()} className="h-9 rounded-md bg-primary px-3 text-[12px] font-semibold text-primary-foreground disabled:opacity-50">Add</button>
+              <Button onClick={addNote} disabled={busy || !note.trim()} size="sm">Add</Button>
             </div>
           </section>
         </div>
@@ -165,7 +189,6 @@ function TaskInspector() {
                   <Icon name="lock_clock" className="text-[16px]" /> Approve & continue
                 </button>
               )}
-              <TaskCardActions task={task} compact />
               <select
                 value={task.status}
                 disabled={busy}
