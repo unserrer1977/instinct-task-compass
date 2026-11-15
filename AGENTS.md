@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Dedicated task boards reuse ControlBoard with a record-based scope, leaving the shared task cache and status/reply actions unchanged; new-role scope excludes generic job-search tasks.
+- Dedicated task boards reuse ControlBoard with a record-based scope, leaving the shared task cache and actions unchanged; /new-job preserves its URL as Work & career and includes Instinct-sourced tasks plus career/work categories and explicit career terms.
 - Task detail summaries derive only from recorded status and current_step; source identifies who recorded a task, not its assignee, and absent dependencies remain explicitly unknown.
 - The Control Centre dashboard uses a route-scoped theme (shared by the task detail page via AppShell's path check) and a responsive four-status board with agent/source tiles and category filters; it never infers external platforms or recurring schedules absent from task records.
 - Task Q&A uses an authenticated TanStack streaming route with caller-scoped task reads and a single account-saved UIMessage transcript; topics annotate exchanges and have read-view URLs, never separate communication sessions.

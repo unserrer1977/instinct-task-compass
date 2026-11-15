@@ -17,3 +17,4 @@
 - [ ] Due/overdue/blocked/completed notifications remain deferred; this request connects replies only.
 - [x] Make task cards open a clear detail view with status, waiting dependencies and the next action; verify navigation and controls.
 - [x] Add a dedicated new-job page with explicitly related tasks and existing board actions; verify signed-in navigation and mobile layout (no explicitly related tasks currently recorded).
+- [x] Expand the career shortcut/page to include Instinct, job searching, current work and applications; seven matching tests pass and signed-in navigation shows 27 open tasks without mobile overflow.
