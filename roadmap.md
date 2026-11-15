@@ -13,6 +13,6 @@
 - [x] Verify reply persistence, error handling, and desktop/mobile layouts.
 - [x] Add a connection status page with real connection activity, last task transfer, and pending Instinct tasks.
 - [x] Verify connection labels, navigation, and signed-in desktop/mobile display.
-- [ ] Connect owner-scoped dashboard reply emails to Instinct with task references, dates and requested actions; verify a real send.
+- [x] Connect owner-scoped dashboard reply emails to Instinct with task references, dates and requested actions; verify a real send (Resend reports delivered).
 - [ ] Due/overdue/blocked/completed notifications remain deferred; this request connects replies only.
 - [x] Make task cards open a clear detail view with status, waiting dependencies and the next action; verify navigation and controls.
