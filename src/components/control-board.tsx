@@ -17,9 +17,10 @@ import { PlatformBadges, InstinctLogo, detectPlatforms, PLATFORMS } from "@/comp
 
 function BoardCard({ task }: { task: Task }) {
   const { change } = useTaskActions();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(true);
   const waiting = task.status === "needs_review", done = task.status === "completed";
-  return <article draggable onDragStart={e => { e.dataTransfer.setData("text/task-id", task.id); e.dataTransfer.effectAllowed = "move"; }} className={cn("cc-board-card cursor-grab active:cursor-grabbing min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
+  return <article draggable onClick={event => { if (event.target instanceof Element && !event.target.closest("a, button, input, select, textarea, label, [role=dialog], [role=checkbox]") && !window.getSelection()?.toString()) void navigate({ to: "/tasks/$id", params: { id: task.id } }); }} onDragStart={e => { e.dataTransfer.setData("text/task-id", task.id); e.dataTransfer.effectAllowed = "move"; }} className={cn("cc-board-card cursor-grab active:cursor-grabbing min-w-0 rounded-lg border bg-card p-2.5", waiting ? "border-warning/40" : "border-border")}>
     <div className="flex items-start gap-1">
     <Link draggable={false} to="/tasks/$id" params={{ id: task.id }} className={cn("group flex min-w-0 flex-1 items-start gap-2 text-[13px] font-medium leading-snug hover:text-primary", done && "text-muted-foreground")}>
       <h3 className="min-w-0 flex-1 break-words [overflow-wrap:anywhere]">{task.title}</h3><ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground group-hover:text-primary" />
