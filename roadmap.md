@@ -16,3 +16,4 @@
 - [x] Connect owner-scoped dashboard reply emails to Instinct with task references, dates and requested actions; verify a real send (Resend reports delivered).
 - [ ] Due/overdue/blocked/completed notifications remain deferred; this request connects replies only.
 - [x] Make task cards open a clear detail view with status, waiting dependencies and the next action; verify navigation and controls.
+- [ ] Add a dedicated new-job page with explicitly related tasks and existing board actions; verify signed-in navigation and mobile layout.
