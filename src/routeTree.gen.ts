@@ -17,6 +17,7 @@ import { Route as AuthenticatedAssistantRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConnectionsRouteImport } from './routes/_authenticated/connections'
 import { Route as AuthenticatedDelegateRouteImport } from './routes/_authenticated/delegate'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedNewJobRouteImport } from './routes/_authenticated/new-job'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
@@ -65,6 +66,11 @@ const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNewJobRoute = AuthenticatedNewJobRouteImport.update({
+  id: '/new-job',
+  path: '/new-job',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/connections': typeof AuthenticatedConnectionsRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/new-job': typeof AuthenticatedNewJobRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/connections': typeof AuthenticatedConnectionsRoute
   '/delegate': typeof AuthenticatedDelegateRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/new-job': typeof AuthenticatedNewJobRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/_authenticated/connections': typeof AuthenticatedConnectionsRoute
   '/_authenticated/delegate': typeof AuthenticatedDelegateRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/new-job': typeof AuthenticatedNewJobRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/assistant': typeof ApiAssistantRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/connections'
     | '/delegate'
     | '/history'
+    | '/new-job'
     | '/settings'
     | '/today'
     | '/api/assistant'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/connections'
     | '/delegate'
     | '/history'
+    | '/new-job'
     | '/settings'
     | '/today'
     | '/api/assistant'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connections'
     | '/_authenticated/delegate'
     | '/_authenticated/history'
+    | '/_authenticated/new-job'
     | '/_authenticated/settings'
     | '/_authenticated/today'
     | '/api/assistant'
@@ -271,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHistoryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/new-job': {
+      id: '/_authenticated/new-job'
+      path: '/new-job'
+      fullPath: '/new-job'
+      preLoaderRoute: typeof AuthenticatedNewJobRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -328,6 +347,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConnectionsRoute: typeof AuthenticatedConnectionsRoute
   AuthenticatedDelegateRoute: typeof AuthenticatedDelegateRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedNewJobRoute: typeof AuthenticatedNewJobRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
   AuthenticatedDiscussionsTopicIdRoute: typeof AuthenticatedDiscussionsTopicIdRoute
@@ -340,6 +360,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConnectionsRoute: AuthenticatedConnectionsRoute,
   AuthenticatedDelegateRoute: AuthenticatedDelegateRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedNewJobRoute: AuthenticatedNewJobRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
   AuthenticatedDiscussionsTopicIdRoute: AuthenticatedDiscussionsTopicIdRoute,
